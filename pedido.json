@@ -1,0 +1,378 @@
+{
+  "path": "PurchaseRequests/1YIZbza1RN0IsF5fKNmY",
+  "path_type": "document",
+  "explored_at": "2026-02-01T05:11:36.804900",
+  "structure": {
+    "_document_id": "1YIZbza1RN0IsF5fKNmY",
+    "_document_exists": true,
+    "_fields": {
+      "review": {
+        "name": "review",
+        "type": "NoneType",
+        "value_sample": null,
+        "structure": null
+      },
+      "deliveryPrice": {
+        "name": "deliveryPrice",
+        "type": "float",
+        "value_sample": 0,
+        "structure": null
+      },
+      "cancelReason": {
+        "name": "cancelReason",
+        "type": "str",
+        "value_sample": "",
+        "structure": null
+      },
+      "purchasePayment": {
+        "name": "purchasePayment",
+        "type": "map",
+        "value_sample": null,
+        "structure": {
+          "valueBack": {
+            "type": "NoneType",
+            "sample": null
+          },
+          "paymentValue": {
+            "type": "float",
+            "sample": 0
+          },
+          "paymentType": {
+            "type": "str",
+            "sample": "PaymentType.creditcard"
+          }
+        }
+      },
+      "currentPurchaseStatus": {
+        "name": "currentPurchaseStatus",
+        "type": "str",
+        "value_sample": "PurchaseStatus.completed",
+        "structure": null
+      },
+      "scheduling": {
+        "name": "scheduling",
+        "type": "DatetimeWithNanoseconds",
+        "value_sample": "2025-10-01T14:34:00+00:00",
+        "structure": null
+      },
+      "clientId": {
+        "name": "clientId",
+        "type": "str",
+        "value_sample": "XbcNhpSitOOhvBKUc9fD",
+        "structure": null
+      },
+      "codeConfirmation": {
+        "name": "codeConfirmation",
+        "type": "str",
+        "value_sample": "",
+        "structure": null
+      },
+      "companyName": {
+        "name": "companyName",
+        "type": "str",
+        "value_sample": "",
+        "structure": null
+      },
+      "documentInNote": {
+        "name": "documentInNote",
+        "type": "NoneType",
+        "value_sample": null,
+        "structure": null
+      },
+      "companyAddress": {
+        "name": "companyAddress",
+        "type": "str",
+        "value_sample": "",
+        "structure": null
+      },
+      "statusList": {
+        "name": "statusList",
+        "type": "array",
+        "value_sample": null,
+        "structure": null,
+        "array_length": 6,
+        "element_type": "dict",
+        "element_structure": {
+          "createdAt": "DatetimeWithNanoseconds",
+          "purchaseStatus": "str"
+        },
+        "element_sample": {
+          "createdAt": "2025-10-01T14:04:10.092018+00:00",
+          "purchaseStatus": "PurchaseStatus.pending"
+        }
+      },
+      "clientReference": {
+        "name": "clientReference",
+        "type": "DocumentReference",
+        "value_sample": {
+          "_type": "DocumentReference",
+          "path": "Users/XbcNhpSitOOhvBKUc9fD"
+        },
+        "structure": null
+      },
+      "deliveryPerson": {
+        "name": "deliveryPerson",
+        "type": "map",
+        "value_sample": null,
+        "structure": {
+          "email": {
+            "type": "str",
+            "sample": ""
+          },
+          "phone": {
+            "type": "str",
+            "sample": ""
+          },
+          "name": {
+            "type": "str",
+            "sample": "Thiago"
+          }
+        }
+      },
+      "clientName": {
+        "name": "clientName",
+        "type": "str",
+        "value_sample": "Emiliana Souza",
+        "structure": null
+      },
+      "id": {
+        "name": "id",
+        "type": "str",
+        "value_sample": "1YIZbza1RN0IsF5fKNmY",
+        "structure": null
+      },
+      "price": {
+        "name": "price",
+        "type": "float",
+        "value_sample": 265.19,
+        "structure": null
+      },
+      "updatedAt": {
+        "name": "updatedAt",
+        "type": "NoneType",
+        "value_sample": null,
+        "structure": null
+      },
+      "schedule": {
+        "name": "schedule",
+        "type": "map",
+        "value_sample": null,
+        "structure": {
+          "isAutomaticSchedule": {
+            "type": "bool",
+            "sample": true
+          },
+          "maxDateTime": {
+            "type": "DatetimeWithNanoseconds",
+            "sample": "2025-10-01T18:04:00+00:00"
+          },
+          "value": {
+            "type": "float",
+            "sample": 0
+          },
+          "id": {
+            "type": "str",
+            "sample": "2025-10-01 11:34 - 2025-10-01 15:04"
+          },
+          "minDateTime": {
+            "type": "DatetimeWithNanoseconds",
+            "sample": "2025-10-01T14:34:00+00:00"
+          }
+        }
+      },
+      "companyImageUrl": {
+        "name": "companyImageUrl",
+        "type": "str",
+        "value_sample": "",
+        "structure": null
+      },
+      "total": {
+        "name": "total",
+        "type": "float",
+        "value_sample": 265.19,
+        "structure": null
+      },
+      "chatReference": {
+        "name": "chatReference",
+        "type": "NoneType",
+        "value_sample": null,
+        "structure": null
+      },
+      "schedulerRef": {
+        "name": "schedulerRef",
+        "type": "NoneType",
+        "value_sample": null,
+        "structure": null
+      },
+      "createdAt": {
+        "name": "createdAt",
+        "type": "DatetimeWithNanoseconds",
+        "value_sample": "2025-10-01T14:04:10.091419+00:00",
+        "structure": null
+      },
+      "address": {
+        "name": "address",
+        "type": "map",
+        "value_sample": null,
+        "structure": {
+          "updateAt": {
+            "type": "DatetimeWithNanoseconds",
+            "sample": "2025-10-01T14:04:10.091558+00:00"
+          },
+          "id": {
+            "type": "str",
+            "sample": ""
+          },
+          "zipCode": {
+            "type": "str",
+            "sample": "76700-000"
+          },
+          "city": {
+            "type": "str",
+            "sample": "Mozarlândia"
+          },
+          "neighborhood": {
+            "type": "str",
+            "sample": "Camões"
+          },
+          "name": {
+            "type": "str",
+            "sample": "Rua Nova Esperança, 0, Camões"
+          },
+          "reference": {
+            "type": "NoneType",
+            "sample": null
+          },
+          "number": {
+            "type": "str",
+            "sample": "0"
+          },
+          "street": {
+            "type": "str",
+            "sample": "Rua Nova Esperança"
+          },
+          "fullAddress": {
+            "type": "str",
+            "sample": "Rua Nova Esperança, Rua Nova Esperança, Nº 0 , Camões, Mozarlândia, Goiás, CEP 76700-000."
+          },
+          "position": {
+            "type": "GeoPoint",
+            "sample": {
+              "_type": "GeoPoint",
+              "latitude": -14.755797881533407,
+              "longitude": -50.573117695748806
+            }
+          },
+          "uf": {
+            "type": "str",
+            "sample": "GO"
+          },
+          "state": {
+            "type": "str",
+            "sample": "Goiás"
+          },
+          "complement": {
+            "type": "str",
+            "sample": "kitnet"
+          },
+          "createAt": {
+            "type": "DatetimeWithNanoseconds",
+            "sample": "2025-10-01T14:04:10.091558+00:00"
+          }
+        }
+      },
+      "productsCart": {
+        "name": "productsCart",
+        "type": "array",
+        "value_sample": null,
+        "structure": null,
+        "array_length": 20,
+        "element_type": "dict",
+        "element_structure": {
+          "observationIsPermited": "bool",
+          "quantity": "int",
+          "id": "str",
+          "clientRef": "DocumentReference",
+          "observations": "NoneType",
+          "companyRef": "DocumentReference",
+          "product": "dict",
+          "productRef": "DocumentReference"
+        },
+        "element_sample": {
+          "observationIsPermited": false,
+          "quantity": 1,
+          "id": "3fu0M9vA7xozqmJYTzjS",
+          "clientRef": {
+            "_type": "DocumentReference",
+            "path": "Users/XbcNhpSitOOhvBKUc9fD"
+          },
+          "observations": null,
+          "companyRef": {
+            "_type": "DocumentReference",
+            "path": "estabelecimentos/jQQjHTCc2zW1tuZMQzGF"
+          },
+          "product": {
+            "description": "OVOS BRANCO TIPO EXTRA  30",
+            "barCode": "0000000458963",
+            "unitType": "ProductUnitType.unidade",
+            "id": "3fu0M9vA7xozqmJYTzjS",
+            "price": 19.2,
+            "previewPrice": 0,
+            "images": [
+              {
+                "fileName": "1751934379910_undefined",
+                "fileUrl": "https://firebasestorage.googleapis.com/v0/b/appmobileprod-19505.appspot.com/o/Products%2F3fu0M9vA7xozqmJYTzjS%2Fimages%2F1751934379910_undefined?alt=media&token=9311b525-4b0a-480f-8129-0a862b78ffba",
+                "folderPath": "Products/3fu0M9vA7xozqmJYTzjS/images",
+                "reference": null,
+                "itsFromPlatform": true,
+                "quality": 100
+              }
+            ],
+            "unitQuantity": 1,
+            "name": "Ovos Branco Extra 30 Unidades"
+          },
+          "productRef": {
+            "_type": "DocumentReference",
+            "path": "estabelecimentos/jQQjHTCc2zW1tuZMQzGF/Products/3fu0M9vA7xozqmJYTzjS"
+          }
+        }
+      },
+      "companyReference": {
+        "name": "companyReference",
+        "type": "DocumentReference",
+        "value_sample": {
+          "_type": "DocumentReference",
+          "path": "estabelecimentos/jQQjHTCc2zW1tuZMQzGF"
+        },
+        "structure": null
+      },
+      "estimatedTimeDelivery": {
+        "name": "estimatedTimeDelivery",
+        "type": "map",
+        "value_sample": null,
+        "structure": {
+          "date": {
+            "type": "DatetimeWithNanoseconds",
+            "sample": "2025-10-01T14:34:00+00:00"
+          },
+          "intervalMinutes": {
+            "type": "int",
+            "sample": 210
+          }
+        }
+      },
+      "orderNumber": {
+        "name": "orderNumber",
+        "type": "str",
+        "value_sample": "000075",
+        "structure": null
+      }
+    },
+    "_subcollections": []
+  },
+  "exploration_stats": {
+    "total_docs": 0,
+    "processed_docs": 0,
+    "collections_found": 0
+  }
+}

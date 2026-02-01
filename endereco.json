@@ -1,0 +1,426 @@
+{
+  "path": "Users/KNKjFeZzhbTwjUnYXfeJ/Addresses",
+  "path_type": "collection",
+  "explored_at": "2026-02-01T05:10:18.190041",
+  "structure": {
+    "collection_id": "Addresses",
+    "type": "collection",
+    "document_count_sample": 1,
+    "sample_documents": [
+      {
+        "_document_id": "AiZoHCYUJFsSFjZsbgFV",
+        "_document_exists": true,
+        "_fields": {
+          "updateAt": {
+            "name": "updateAt",
+            "type": "DatetimeWithNanoseconds",
+            "value_sample": "2026-01-30T17:09:30.420618+00:00",
+            "structure": null
+          },
+          "id": {
+            "name": "id",
+            "type": "NoneType",
+            "value_sample": null,
+            "structure": null
+          },
+          "zipCode": {
+            "name": "zipCode",
+            "type": "str",
+            "value_sample": "49200-000",
+            "structure": null
+          },
+          "reference": {
+            "name": "reference",
+            "type": "str",
+            "value_sample": "última rua do campo de Ro ",
+            "structure": null
+          },
+          "neighborhood": {
+            "name": "neighborhood",
+            "type": "str",
+            "value_sample": "Porto d areia",
+            "structure": null
+          },
+          "name": {
+            "name": "name",
+            "type": "str",
+            "value_sample": "rua Maria São Pedro, 37, Porto d areia",
+            "structure": null
+          },
+          "city": {
+            "name": "city",
+            "type": "str",
+            "value_sample": "Estância",
+            "structure": null
+          },
+          "number": {
+            "name": "number",
+            "type": "str",
+            "value_sample": "37",
+            "structure": null
+          },
+          "street": {
+            "name": "street",
+            "type": "str",
+            "value_sample": "rua Maria São Pedro",
+            "structure": null
+          },
+          "fullAddress": {
+            "name": "fullAddress",
+            "type": "str",
+            "value_sample": "rua Maria São Pedro, rua Maria São Pedro, Nº 37 , Porto d areia, Estância, Sergipe, CEP 49200-000.",
+            "structure": null
+          },
+          "position": {
+            "name": "position",
+            "type": "GeoPoint",
+            "value_sample": {
+              "_type": "GeoPoint",
+              "latitude": -11.243418,
+              "longitude": -37.4254444
+            },
+            "structure": null
+          },
+          "uf": {
+            "name": "uf",
+            "type": "str",
+            "value_sample": "SE",
+            "structure": null
+          },
+          "state": {
+            "name": "state",
+            "type": "str",
+            "value_sample": "Sergipe",
+            "structure": null
+          },
+          "complement": {
+            "name": "complement",
+            "type": "str",
+            "value_sample": "casa",
+            "structure": null
+          },
+          "createAt": {
+            "name": "createAt",
+            "type": "DatetimeWithNanoseconds",
+            "value_sample": "2026-01-30T17:09:30.420618+00:00",
+            "structure": null
+          }
+        },
+        "_subcollections": []
+      }
+    ],
+    "common_fields": {
+      "updateAt": {
+        "frequency": 1,
+        "count": 1,
+        "types": [
+          "DatetimeWithNanoseconds"
+        ],
+        "sample_values": [
+          "2026-01-30T17:09:30.420618+00:00"
+        ]
+      },
+      "id": {
+        "frequency": 1,
+        "count": 1,
+        "types": [
+          "NoneType"
+        ],
+        "sample_values": []
+      },
+      "zipCode": {
+        "frequency": 1,
+        "count": 1,
+        "types": [
+          "str"
+        ],
+        "sample_values": [
+          "49200-000"
+        ]
+      },
+      "reference": {
+        "frequency": 1,
+        "count": 1,
+        "types": [
+          "str"
+        ],
+        "sample_values": [
+          "última rua do campo de Ro "
+        ]
+      },
+      "neighborhood": {
+        "frequency": 1,
+        "count": 1,
+        "types": [
+          "str"
+        ],
+        "sample_values": [
+          "Porto d areia"
+        ]
+      },
+      "name": {
+        "frequency": 1,
+        "count": 1,
+        "types": [
+          "str"
+        ],
+        "sample_values": [
+          "rua Maria São Pedro, 37, Porto d areia"
+        ]
+      },
+      "city": {
+        "frequency": 1,
+        "count": 1,
+        "types": [
+          "str"
+        ],
+        "sample_values": [
+          "Estância"
+        ]
+      },
+      "number": {
+        "frequency": 1,
+        "count": 1,
+        "types": [
+          "str"
+        ],
+        "sample_values": [
+          "37"
+        ]
+      },
+      "street": {
+        "frequency": 1,
+        "count": 1,
+        "types": [
+          "str"
+        ],
+        "sample_values": [
+          "rua Maria São Pedro"
+        ]
+      },
+      "fullAddress": {
+        "frequency": 1,
+        "count": 1,
+        "types": [
+          "str"
+        ],
+        "sample_values": [
+          "rua Maria São Pedro, rua Maria São Pedro, Nº 37 , Porto d areia, Estância, Sergipe, CEP 49200-000."
+        ]
+      },
+      "position": {
+        "frequency": 1,
+        "count": 1,
+        "types": [
+          "GeoPoint"
+        ],
+        "sample_values": [
+          {
+            "_type": "GeoPoint",
+            "latitude": -11.243418,
+            "longitude": -37.4254444
+          }
+        ]
+      },
+      "uf": {
+        "frequency": 1,
+        "count": 1,
+        "types": [
+          "str"
+        ],
+        "sample_values": [
+          "SE"
+        ]
+      },
+      "state": {
+        "frequency": 1,
+        "count": 1,
+        "types": [
+          "str"
+        ],
+        "sample_values": [
+          "Sergipe"
+        ]
+      },
+      "complement": {
+        "frequency": 1,
+        "count": 1,
+        "types": [
+          "str"
+        ],
+        "sample_values": [
+          "casa"
+        ]
+      },
+      "createAt": {
+        "frequency": 1,
+        "count": 1,
+        "types": [
+          "DatetimeWithNanoseconds"
+        ],
+        "sample_values": [
+          "2026-01-30T17:09:30.420618+00:00"
+        ]
+      }
+    },
+    "field_statistics": {
+      "updateAt": {
+        "frequency": 1,
+        "count": 1,
+        "types": [
+          "DatetimeWithNanoseconds"
+        ],
+        "sample_values": [
+          "2026-01-30T17:09:30.420618+00:00"
+        ]
+      },
+      "id": {
+        "frequency": 1,
+        "count": 1,
+        "types": [
+          "NoneType"
+        ],
+        "sample_values": []
+      },
+      "zipCode": {
+        "frequency": 1,
+        "count": 1,
+        "types": [
+          "str"
+        ],
+        "sample_values": [
+          "49200-000"
+        ]
+      },
+      "reference": {
+        "frequency": 1,
+        "count": 1,
+        "types": [
+          "str"
+        ],
+        "sample_values": [
+          "última rua do campo de Ro "
+        ]
+      },
+      "neighborhood": {
+        "frequency": 1,
+        "count": 1,
+        "types": [
+          "str"
+        ],
+        "sample_values": [
+          "Porto d areia"
+        ]
+      },
+      "name": {
+        "frequency": 1,
+        "count": 1,
+        "types": [
+          "str"
+        ],
+        "sample_values": [
+          "rua Maria São Pedro, 37, Porto d areia"
+        ]
+      },
+      "city": {
+        "frequency": 1,
+        "count": 1,
+        "types": [
+          "str"
+        ],
+        "sample_values": [
+          "Estância"
+        ]
+      },
+      "number": {
+        "frequency": 1,
+        "count": 1,
+        "types": [
+          "str"
+        ],
+        "sample_values": [
+          "37"
+        ]
+      },
+      "street": {
+        "frequency": 1,
+        "count": 1,
+        "types": [
+          "str"
+        ],
+        "sample_values": [
+          "rua Maria São Pedro"
+        ]
+      },
+      "fullAddress": {
+        "frequency": 1,
+        "count": 1,
+        "types": [
+          "str"
+        ],
+        "sample_values": [
+          "rua Maria São Pedro, rua Maria São Pedro, Nº 37 , Porto d areia, Estância, Sergipe, CEP 49200-000."
+        ]
+      },
+      "position": {
+        "frequency": 1,
+        "count": 1,
+        "types": [
+          "GeoPoint"
+        ],
+        "sample_values": [
+          {
+            "_type": "GeoPoint",
+            "latitude": -11.243418,
+            "longitude": -37.4254444
+          }
+        ]
+      },
+      "uf": {
+        "frequency": 1,
+        "count": 1,
+        "types": [
+          "str"
+        ],
+        "sample_values": [
+          "SE"
+        ]
+      },
+      "state": {
+        "frequency": 1,
+        "count": 1,
+        "types": [
+          "str"
+        ],
+        "sample_values": [
+          "Sergipe"
+        ]
+      },
+      "complement": {
+        "frequency": 1,
+        "count": 1,
+        "types": [
+          "str"
+        ],
+        "sample_values": [
+          "casa"
+        ]
+      },
+      "createAt": {
+        "frequency": 1,
+        "count": 1,
+        "types": [
+          "DatetimeWithNanoseconds"
+        ],
+        "sample_values": [
+          "2026-01-30T17:09:30.420618+00:00"
+        ]
+      }
+    }
+  },
+  "exploration_stats": {
+    "total_docs": 0,
+    "processed_docs": 1,
+    "collections_found": 1
+  }
+}

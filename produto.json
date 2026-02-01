@@ -1,0 +1,246 @@
+{
+  "path": "estabelecimentos/jQQjHTCc2zW1tuZMQzGF/Products/008GYA2BGtIdjNhWG0uc",
+  "path_type": "document",
+  "explored_at": "2026-02-01T05:13:46.051164",
+  "structure": {
+    "_document_id": "008GYA2BGtIdjNhWG0uc",
+    "_document_exists": true,
+    "_fields": {
+      "publicProductRef": {
+        "name": "publicProductRef",
+        "type": "DocumentReference",
+        "value_sample": {
+          "_type": "DocumentReference",
+          "path": "PublicProducts/lF8bcnycpA0Y5v7rDyzs"
+        },
+        "structure": null
+      },
+      "description": {
+        "name": "description",
+        "type": "str",
+        "value_sample": "MAIONESE BACON SINISTRO STRANGER THINGS HELLMANNS",
+        "structure": null
+      },
+      "barCode": {
+        "name": "barCode",
+        "type": "str",
+        "value_sample": "7891150099371",
+        "structure": null
+      },
+      "id": {
+        "name": "id",
+        "type": "str",
+        "value_sample": "008GYA2BGtIdjNhWG0uc",
+        "structure": null
+      },
+      "quantityInStock": {
+        "name": "quantityInStock",
+        "type": "int",
+        "value_sample": 0,
+        "structure": null
+      },
+      "agranelValue": {
+        "name": "agranelValue",
+        "type": "float",
+        "value_sample": 7.89,
+        "structure": null
+      },
+      "companyRef": {
+        "name": "companyRef",
+        "type": "DocumentReference",
+        "value_sample": {
+          "_type": "DocumentReference",
+          "path": "estabelecimentos/jQQjHTCc2zW1tuZMQzGF"
+        },
+        "structure": null
+      },
+      "externalId": {
+        "name": "externalId",
+        "type": "str",
+        "value_sample": "31545",
+        "structure": null
+      },
+      "images": {
+        "name": "images",
+        "type": "array",
+        "value_sample": null,
+        "structure": null,
+        "array_length": 1,
+        "element_type": "dict",
+        "element_structure": {
+          "fileName": "str",
+          "fileUrl": "str",
+          "folderPath": "str",
+          "reference": "NoneType",
+          "itsFromPlatform": "bool",
+          "quality": "int"
+        },
+        "element_sample": {
+          "fileName": "1752191452925_undefined",
+          "fileUrl": "https://firebasestorage.googleapis.com/v0/b/appmobileprod-19505.appspot.com/o/Products%2F008GYA2BGtIdjNhWG0uc%2Fimages%2F1752191452925_undefined?alt=media&token=c2a0b3c4-b4e6-42bd-9074-fecda22f3b80",
+          "folderPath": "Products/008GYA2BGtIdjNhWG0uc/images",
+          "reference": null,
+          "itsFromPlatform": true,
+          "quality": 100
+        }
+      },
+      "isTrashed": {
+        "name": "isTrashed",
+        "type": "bool",
+        "value_sample": true,
+        "structure": null
+      },
+      "wordKeys": {
+        "name": "wordKeys",
+        "type": "array",
+        "value_sample": null,
+        "structure": null,
+        "array_length": 28,
+        "element_type": "str",
+        "element_sample": "7891150099371"
+      },
+      "subcategoriesIds": {
+        "name": "subcategoriesIds",
+        "type": "array",
+        "value_sample": null,
+        "structure": null,
+        "array_length": 1,
+        "element_type": "str",
+        "element_sample": "6Gpl7D1ld94elJeIxLIM"
+      },
+      "name": {
+        "name": "name",
+        "type": "str",
+        "value_sample": "Maionese Hellmann's Bacon Sinistro Stranger Things",
+        "structure": null
+      },
+      "historyPrice": {
+        "name": "historyPrice",
+        "type": "array",
+        "value_sample": null,
+        "structure": null,
+        "array_length": 7,
+        "element_type": "dict",
+        "element_structure": {
+          "createdAt": "DatetimeWithNanoseconds",
+          "fromPrice": "float",
+          "price": "float"
+        },
+        "element_sample": {
+          "createdAt": "2025-06-21T03:29:37.662000+00:00",
+          "fromPrice": 7.89,
+          "price": 7.89
+        }
+      },
+      "updatedAt": {
+        "name": "updatedAt",
+        "type": "DatetimeWithNanoseconds",
+        "value_sample": "2026-01-24T14:39:55.489000+00:00",
+        "structure": null
+      },
+      "isActive": {
+        "name": "isActive",
+        "type": "bool",
+        "value_sample": false,
+        "structure": null
+      },
+      "mobileId": {
+        "name": "mobileId",
+        "type": "NoneType",
+        "value_sample": null,
+        "structure": null
+      },
+      "deletedAt": {
+        "name": "deletedAt",
+        "type": "NoneType",
+        "value_sample": null,
+        "structure": null
+      },
+      "shelves": {
+        "name": "shelves",
+        "type": "array",
+        "value_sample": null,
+        "structure": null,
+        "array_length": 1,
+        "element_type": "dict",
+        "element_structure": {
+          "productCategoryId": "str",
+          "categoryName": "str",
+          "id": "str",
+          "subcategoryName": "str",
+          "productSubcategoryId": "str"
+        },
+        "element_sample": {
+          "productCategoryId": "mercearia",
+          "categoryName": "Mercearia",
+          "id": "mercearia_6Gpl7D1ld94elJeIxLIM",
+          "subcategoryName": "Maionese",
+          "productSubcategoryId": "6Gpl7D1ld94elJeIxLIM"
+        }
+      },
+      "unityType": {
+        "name": "unityType",
+        "type": "str",
+        "value_sample": "unidade",
+        "structure": null
+      },
+      "createdAt": {
+        "name": "createdAt",
+        "type": "DatetimeWithNanoseconds",
+        "value_sample": "2025-06-21T03:29:37.662000+00:00",
+        "structure": null
+      },
+      "categoriesIds": {
+        "name": "categoriesIds",
+        "type": "array",
+        "value_sample": null,
+        "structure": null,
+        "array_length": 2,
+        "element_type": "str",
+        "element_sample": "conservas"
+      },
+      "currentPrice": {
+        "name": "currentPrice",
+        "type": "float",
+        "value_sample": 7.89,
+        "structure": null
+      },
+      "hasBarCode": {
+        "name": "hasBarCode",
+        "type": "bool",
+        "value_sample": true,
+        "structure": null
+      },
+      "unitQuantity": {
+        "name": "unitQuantity",
+        "type": "int",
+        "value_sample": 1,
+        "structure": null
+      },
+      "shelvesIds": {
+        "name": "shelvesIds",
+        "type": "array",
+        "value_sample": null,
+        "structure": null,
+        "array_length": 1,
+        "element_type": "str",
+        "element_sample": "mercearia_6Gpl7D1ld94elJeIxLIM"
+      },
+      "searchIndex": {
+        "name": "searchIndex",
+        "type": "array",
+        "value_sample": null,
+        "structure": null,
+        "array_length": 28,
+        "element_type": "str",
+        "element_sample": "7891150099371"
+      }
+    },
+    "_subcollections": []
+  },
+  "exploration_stats": {
+    "total_docs": 0,
+    "processed_docs": 0,
+    "collections_found": 0
+  }
+}

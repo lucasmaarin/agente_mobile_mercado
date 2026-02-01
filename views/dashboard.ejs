@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - WhatsApp Sales Bot</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .status-dot { animation: pulse 2s infinite; }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <!-- Header -->
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center">
+                    <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                    </svg>
+                </div>
+                <h1 class="text-xl font-bold text-gray-800">WhatsApp Sales Bot</h1>
+            </div>
+            <div class="flex items-center gap-4">
+                <span class="text-gray-600"><%= user.name || user.email %></span>
+                <button onclick="logout()" class="text-gray-500 hover:text-red-500 transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 py-8">
+        <!-- Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+            <div class="bg-white rounded-xl p-6 shadow-sm">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm">Mensagens Hoje</p>
+                        <p id="statMessagesToday" class="text-2xl font-bold text-gray-800">0</p>
+                    </div>
+                    <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                        <svg class="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl p-6 shadow-sm">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm">Total Mensagens</p>
+                        <p id="statTotalMessages" class="text-2xl font-bold text-gray-800">0</p>
+                    </div>
+                    <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                        <svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl p-6 shadow-sm">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm">Pedidos</p>
+                        <p id="statOrders" class="text-2xl font-bold text-gray-800">0</p>
+                    </div>
+                    <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                        <svg class="w-6 h-6 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl p-6 shadow-sm">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm">Status</p>
+                        <p id="statStatus" class="text-lg font-semibold text-gray-800">Desconectado</p>
+                    </div>
+                    <div id="statusIndicator" class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
+                        <div class="w-4 h-4 bg-gray-400 rounded-full status-dot"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Conexao WhatsApp -->
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <h2 class="text-lg font-semibold text-gray-800 mb-4">Conexao WhatsApp</h2>
+
+                    <!-- QR Code Area -->
+                    <div id="qrCodeArea" class="hidden">
+                        <div class="bg-gray-50 rounded-lg p-4 text-center">
+                            <img id="qrCodeImg" src="" alt="QR Code" class="mx-auto max-w-[200px]">
+                            <p class="text-gray-500 text-sm mt-3">Escaneie com seu WhatsApp</p>
+                        </div>
+                    </div>
+
+                    <!-- Connected State -->
+                    <div id="connectedArea" class="hidden">
+                        <div class="bg-green-50 rounded-lg p-4 text-center">
+                            <div class="w-16 h-16 bg-green-500 rounded-full mx-auto flex items-center justify-center mb-3">
+                                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                </svg>
+                            </div>
+                            <p class="text-green-700 font-medium">WhatsApp Conectado!</p>
+                        </div>
+                    </div>
+
+                    <!-- Disconnected State -->
+                    <div id="disconnectedArea">
+                        <div class="bg-gray-50 rounded-lg p-4 text-center">
+                            <div class="w-16 h-16 bg-gray-300 rounded-full mx-auto flex items-center justify-center mb-3">
+                                <svg class="w-8 h-8 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
+                                </svg>
+                            </div>
+                            <p class="text-gray-500">WhatsApp nao conectado</p>
+                        </div>
+                    </div>
+
+                    <!-- Botoes -->
+                    <div class="mt-4 space-y-2">
+                        <button id="connectBtn" onclick="connectWhatsApp()" class="w-full bg-green-500 text-white rounded-lg px-4 py-3 font-medium hover:bg-green-600 transition-colors">
+                            Conectar WhatsApp
+                        </button>
+                        <button id="disconnectBtn" onclick="disconnectWhatsApp()" class="hidden w-full bg-red-500 text-white rounded-lg px-4 py-3 font-medium hover:bg-red-600 transition-colors">
+                            Desconectar
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Controle do Agente -->
+                <div class="bg-white rounded-xl shadow-sm p-6 mt-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h2 class="text-lg font-semibold text-gray-800">Agente IA</h2>
+                            <p id="agentStatusText" class="text-gray-500 text-sm">Desativado</p>
+                        </div>
+                        <button id="agentToggle" onclick="toggleAgent()" class="relative inline-flex h-8 w-14 items-center rounded-full bg-gray-300 transition-colors">
+                            <span class="inline-block h-6 w-6 transform rounded-full bg-white shadow-lg transition-transform translate-x-1"></span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Configuracoes -->
+            <div class="lg:col-span-2">
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <h2 class="text-lg font-semibold text-gray-800 mb-6">Configuracoes do Agente</h2>
+
+                    <form id="settingsForm" onsubmit="saveSettings(event)" class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-gray-600 text-sm mb-1">Nome do Agente</label>
+                                <input type="text" id="agentName" class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Ex: Max">
+                            </div>
+                            <div>
+                                <label class="block text-gray-600 text-sm mb-1">Nome da Empresa</label>
+                                <input type="text" id="companyName" class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Ex: Minha Loja">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-gray-600 text-sm mb-1">Taxa de Entrega (R$)</label>
+                                <input type="number" id="deliveryPrice" step="0.01" min="0" class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="5.00">
+                            </div>
+                            <div>
+                                <label class="block text-gray-600 text-sm mb-1">ID da Empresa</label>
+                                <input type="text" id="companyId" class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="ID no Firebase">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-gray-600 text-sm mb-1">Mensagem de Boas-vindas</label>
+                            <textarea id="welcomeMessage" rows="3" class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Ola! Como posso ajudar?"></textarea>
+                        </div>
+
+                        <button type="submit" class="bg-green-500 text-white rounded-lg px-6 py-2 font-medium hover:bg-green-600 transition-colors">
+                            Salvar Configuracoes
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Conversas Recentes -->
+                <div class="bg-white rounded-xl shadow-sm p-6 mt-4">
+                    <h2 class="text-lg font-semibold text-gray-800 mb-4">Conversas Recentes</h2>
+
+                    <div id="conversationsList" class="space-y-2 max-h-80 overflow-y-auto">
+                        <p class="text-gray-400 text-center py-4">Nenhuma conversa ainda</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Toast -->
+    <div id="toast" class="fixed bottom-4 right-4 bg-gray-800 text-white px-6 py-3 rounded-lg shadow-lg transform translate-y-full opacity-0 transition-all duration-300">
+        <span id="toastMessage"></span>
+    </div>
+
+    <script>
+        let pollingInterval = null;
+
+        // Inicializacao
+        document.addEventListener('DOMContentLoaded', () => {
+            loadSettings();
+            loadStats();
+            loadConversations();
+            checkWhatsAppStatus();
+
+            // Polling para status do WhatsApp
+            pollingInterval = setInterval(checkWhatsAppStatus, 3000);
+        });
+
+        // Toast
+        function showToast(message, isError = false) {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toastMessage');
+
+            toastMessage.textContent = message;
+            toast.classList.remove('translate-y-full', 'opacity-0');
+            toast.classList.toggle('bg-red-500', isError);
+            toast.classList.toggle('bg-gray-800', !isError);
+
+            setTimeout(() => {
+                toast.classList.add('translate-y-full', 'opacity-0');
+            }, 3000);
+        }
+
+        // Logout
+        async function logout() {
+            await fetch('/auth/logout', { method: 'POST' });
+            window.location.href = '/login';
+        }
+
+        // Carregar configuracoes
+        async function loadSettings() {
+            try {
+                const res = await fetch('/api/settings');
+                const data = await res.json();
+
+                if (data.agent_settings) {
+                    document.getElementById('agentName').value = data.agent_settings.agent_name || '';
+                    document.getElementById('companyName').value = data.agent_settings.company_name || '';
+                    document.getElementById('deliveryPrice').value = data.agent_settings.delivery_price || 0;
+                    document.getElementById('companyId').value = data.agent_settings.company_id || '';
+                    document.getElementById('welcomeMessage').value = data.agent_settings.welcome_message || '';
+
+                    updateAgentToggle(data.agent_settings.active);
+                }
+            } catch (error) {
+                console.error('Erro ao carregar configuracoes:', error);
+            }
+        }
+
+        // Salvar configuracoes
+        async function saveSettings(event) {
+            event.preventDefault();
+
+            try {
+                const res = await fetch('/api/settings', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        agent_name: document.getElementById('agentName').value,
+                        company_name: document.getElementById('companyName').value,
+                        delivery_price: parseFloat(document.getElementById('deliveryPrice').value),
+                        company_id: document.getElementById('companyId').value,
+                        welcome_message: document.getElementById('welcomeMessage').value
+                    })
+                });
+
+                const data = await res.json();
+
+                if (data.success) {
+                    showToast('Configuracoes salvas!');
+                } else {
+                    showToast('Erro ao salvar', true);
+                }
+            } catch (error) {
+                showToast('Erro ao salvar', true);
+            }
+        }
+
+        // Toggle agente
+        async function toggleAgent() {
+            try {
+                const res = await fetch('/api/settings/toggle-agent', { method: 'POST' });
+                const data = await res.json();
+
+                if (data.success) {
+                    updateAgentToggle(data.active);
+                    showToast(data.active ? 'Agente ativado!' : 'Agente desativado!');
+                }
+            } catch (error) {
+                showToast('Erro ao alternar agente', true);
+            }
+        }
+
+        function updateAgentToggle(active) {
+            const toggle = document.getElementById('agentToggle');
+            const statusText = document.getElementById('agentStatusText');
+
+            if (active) {
+                toggle.classList.remove('bg-gray-300');
+                toggle.classList.add('bg-green-500');
+                toggle.querySelector('span').classList.remove('translate-x-1');
+                toggle.querySelector('span').classList.add('translate-x-7');
+                statusText.textContent = 'Ativado';
+                statusText.classList.remove('text-gray-500');
+                statusText.classList.add('text-green-500');
+            } else {
+                toggle.classList.add('bg-gray-300');
+                toggle.classList.remove('bg-green-500');
+                toggle.querySelector('span').classList.add('translate-x-1');
+                toggle.querySelector('span').classList.remove('translate-x-7');
+                statusText.textContent = 'Desativado';
+                statusText.classList.add('text-gray-500');
+                statusText.classList.remove('text-green-500');
+            }
+        }
+
+        // Carregar estatisticas
+        async function loadStats() {
+            try {
+                const res = await fetch('/api/stats');
+                const data = await res.json();
+
+                if (data.stats) {
+                    document.getElementById('statMessagesToday').textContent = data.stats.messages_today || 0;
+                    document.getElementById('statTotalMessages').textContent = data.stats.total_messages || 0;
+                    document.getElementById('statOrders').textContent = data.stats.orders_count || 0;
+                }
+            } catch (error) {
+                console.error('Erro ao carregar stats:', error);
+            }
+        }
+
+        // Carregar conversas
+        async function loadConversations() {
+            try {
+                const res = await fetch('/api/conversations');
+                const data = await res.json();
+
+                const list = document.getElementById('conversationsList');
+
+                if (data.conversations && data.conversations.length > 0) {
+                    list.innerHTML = data.conversations.map(conv => {
+                        const lastMsg = conv.messages?.[conv.messages.length - 1];
+                        return `
+                            <div class="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-lg cursor-pointer">
+                                <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                                    <span class="text-green-600 font-medium">${conv.phone?.slice(-2) || '??'}</span>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="font-medium text-gray-800">${conv.phone || 'Desconhecido'}</p>
+                                    <p class="text-gray-500 text-sm truncate">${lastMsg?.content?.slice(0, 40) || 'Sem mensagens'}...</p>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                } else {
+                    list.innerHTML = '<p class="text-gray-400 text-center py-4">Nenhuma conversa ainda</p>';
+                }
+            } catch (error) {
+                console.error('Erro ao carregar conversas:', error);
+            }
+        }
+
+        // Conectar WhatsApp
+        async function connectWhatsApp() {
+            try {
+                document.getElementById('connectBtn').disabled = true;
+                document.getElementById('connectBtn').textContent = 'Conectando...';
+
+                const res = await fetch('/api/whatsapp/connect', { method: 'POST' });
+                const data = await res.json();
+
+                if (!data.success) {
+                    showToast(data.error || 'Erro ao conectar', true);
+                    document.getElementById('connectBtn').disabled = false;
+                    document.getElementById('connectBtn').textContent = 'Conectar WhatsApp';
+                }
+            } catch (error) {
+                showToast('Erro ao conectar', true);
+                document.getElementById('connectBtn').disabled = false;
+                document.getElementById('connectBtn').textContent = 'Conectar WhatsApp';
+            }
+        }
+
+        // Desconectar WhatsApp
+        async function disconnectWhatsApp() {
+            if (!confirm('Deseja realmente desconectar?')) return;
+
+            try {
+                await fetch('/api/whatsapp/disconnect', { method: 'POST' });
+                showToast('WhatsApp desconectado');
+                checkWhatsAppStatus();
+            } catch (error) {
+                showToast('Erro ao desconectar', true);
+            }
+        }
+
+        // Verificar status do WhatsApp
+        async function checkWhatsAppStatus() {
+            try {
+                const res = await fetch('/api/whatsapp/status');
+                const data = await res.json();
+
+                const qrArea = document.getElementById('qrCodeArea');
+                const connectedArea = document.getElementById('connectedArea');
+                const disconnectedArea = document.getElementById('disconnectedArea');
+                const connectBtn = document.getElementById('connectBtn');
+                const disconnectBtn = document.getElementById('disconnectBtn');
+                const statusIndicator = document.getElementById('statusIndicator');
+                const statStatus = document.getElementById('statStatus');
+
+                // Reset
+                qrArea.classList.add('hidden');
+                connectedArea.classList.add('hidden');
+                disconnectedArea.classList.add('hidden');
+
+                if (data.status === 'connected' || data.whatsapp_connected) {
+                    connectedArea.classList.remove('hidden');
+                    connectBtn.classList.add('hidden');
+                    disconnectBtn.classList.remove('hidden');
+                    statusIndicator.querySelector('div').classList.remove('bg-gray-400', 'bg-yellow-400');
+                    statusIndicator.querySelector('div').classList.add('bg-green-500');
+                    statStatus.textContent = 'Conectado';
+                    statStatus.classList.add('text-green-600');
+                } else if (data.status === 'waiting_qr' && data.qrCode) {
+                    qrArea.classList.remove('hidden');
+                    document.getElementById('qrCodeImg').src = data.qrCode;
+                    connectBtn.classList.add('hidden');
+                    disconnectBtn.classList.add('hidden');
+                    statusIndicator.querySelector('div').classList.remove('bg-gray-400', 'bg-green-500');
+                    statusIndicator.querySelector('div').classList.add('bg-yellow-400');
+                    statStatus.textContent = 'Aguardando QR';
+                } else {
+                    disconnectedArea.classList.remove('hidden');
+                    connectBtn.classList.remove('hidden');
+                    connectBtn.disabled = false;
+                    connectBtn.textContent = 'Conectar WhatsApp';
+                    disconnectBtn.classList.add('hidden');
+                    statusIndicator.querySelector('div').classList.remove('bg-green-500', 'bg-yellow-400');
+                    statusIndicator.querySelector('div').classList.add('bg-gray-400');
+                    statStatus.textContent = 'Desconectado';
+                    statStatus.classList.remove('text-green-600');
+                }
+            } catch (error) {
+                console.error('Erro ao verificar status:', error);
+            }
+        }
+    </script>
+</body>
+</html>
