@@ -1,21 +1,22 @@
 const admin = require('firebase-admin');
 const config = require('../config');
 const path = require('path');
+const fs = require('fs');
 
 // Inicializa Firebase Admin
-// Suporta credenciais via arquivo (local) ou variavel de ambiente (Render/producao)
+// Suporta credenciais via variavel de ambiente (Render/producao) ou arquivo (local)
 let credential;
 
 if (process.env.FIREBASE_CREDENTIALS_JSON) {
     // Producao: credenciais via variavel de ambiente (JSON string)
     const serviceAccount = JSON.parse(process.env.FIREBASE_CREDENTIALS_JSON);
     credential = admin.credential.cert(serviceAccount);
-} else if (config.firebase.credentialsPath) {
-    // Local: credenciais via arquivo
+} else if (config.firebase.credentialsPath && fs.existsSync(path.resolve(config.firebase.credentialsPath))) {
+    // Local: credenciais via arquivo (somente se o arquivo existir)
     const serviceAccount = require(path.resolve(config.firebase.credentialsPath));
     credential = admin.credential.cert(serviceAccount);
 } else {
-    throw new Error('Firebase credentials not configured. Set FIREBASE_CREDENTIALS_JSON or FIREBASE_CREDENTIALS_PATH');
+    throw new Error('Firebase credentials not configured. Set FIREBASE_CREDENTIALS_JSON env var or provide firebase-credentials.json file');
 }
 
 admin.initializeApp({ credential });
