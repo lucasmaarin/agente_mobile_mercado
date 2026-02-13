@@ -40,6 +40,7 @@ router.post('/whatsapp/register', async (req, res) => {
             business_account_id: business_account_id || '',
             phone_number: phone_number || ''
         });
+        await firebase.updateWhatsAppStatus(userId, true);
 
         res.json({
             success: true,
@@ -63,6 +64,7 @@ router.delete('/whatsapp/unregister', async (req, res) => {
     try {
         const userId = req.session.userId;
         await firebase.removeWhatsAppCredentials(userId);
+        await firebase.updateWhatsAppStatus(userId, false);
         res.json({ success: true });
     } catch (error) {
         console.error('Erro ao remover WhatsApp:', error);
