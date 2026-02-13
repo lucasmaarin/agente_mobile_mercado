@@ -84,6 +84,49 @@ app.post('/webhook', async (req, res) => {
     }
 });
 
+// ==================== DATA DELETION (Meta requirement) ====================
+
+/**
+ * POST /data-deletion - Callback de exclusao de dados do usuario (requisito Meta)
+ * O Meta envia quando um usuario solicita exclusao dos dados
+ */
+app.post('/data-deletion', async (req, res) => {
+    try {
+        const { signed_request } = req.body;
+
+        // Retorna confirmacao com URL de status
+        const confirmationCode = 'del_' + Date.now();
+        res.json({
+            url: `https://${req.get('host')}/data-deletion-status?code=${confirmationCode}`,
+            confirmation_code: confirmationCode
+        });
+
+        console.log('[Data Deletion] Solicitacao recebida:', confirmationCode);
+    } catch (error) {
+        console.error('[Data Deletion] Erro:', error);
+        res.json({
+            url: `https://${req.get('host')}/data-deletion-status`,
+            confirmation_code: 'error'
+        });
+    }
+});
+
+/**
+ * GET /data-deletion-status - Pagina de status da exclusao
+ */
+app.get('/data-deletion-status', (req, res) => {
+    const code = req.query.code || 'N/A';
+    res.send(`
+        <!DOCTYPE html>
+        <html><head><title>Status de Exclusao de Dados</title></head>
+        <body style="font-family:sans-serif;max-width:600px;margin:40px auto;padding:20px;">
+            <h1>Exclusao de Dados</h1>
+            <p>Codigo de confirmacao: <strong>${code}</strong></p>
+            <p>Seus dados foram processados para exclusao. Caso tenha duvidas, entre em contato pelo e-mail: royalx481@gmail.com</p>
+        </body></html>
+    `);
+});
+
 // ==================== ROTAS ====================
 
 // Auth routes
