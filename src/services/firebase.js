@@ -38,23 +38,21 @@ async function getUser(userId) {
 
     const data = doc.data();
 
-    if (data.agent_settings) {
-        const defaults = {
-            agent_name: 'Max',
-            company_name: config.defaults.companyName,
-            company_id: config.defaults.companyId,
-            delivery_price: config.defaults.deliveryPrice,
-            welcome_message: 'Ola! Sou o Max, assistente virtual. Como posso ajudar?',
-            active: true
-        };
+    // Aplica defaults do agent_settings (sempre, mesmo se nao existir)
+    const defaults = {
+        agent_name: 'Max',
+        company_name: config.defaults.companyName,
+        company_id: config.defaults.companyId,
+        delivery_price: config.defaults.deliveryPrice,
+        welcome_message: 'Ola! Sou o Max, assistente virtual. Como posso ajudar?',
+        active: true
+    };
+    data.agent_settings = { ...defaults, ...(data.agent_settings || {}) };
 
-        data.agent_settings = { ...defaults, ...data.agent_settings };
-
-        if (!doc.data().agent_settings?.company_id && config.defaults.companyId) {
-            await db.collection('users').doc(userId).update({
-                'agent_settings.company_id': config.defaults.companyId
-            });
-        }
+    if (!doc.data().agent_settings?.company_id && config.defaults.companyId) {
+        await db.collection('users').doc(userId).update({
+            'agent_settings.company_id': config.defaults.companyId
+        });
     }
 
     return { id: doc.id, ...data };
@@ -479,18 +477,16 @@ async function getUserByPhoneNumberId(phoneNumberId) {
     const doc = snapshot.docs[0];
     const data = doc.data();
 
-    // Aplica defaults do agent_settings
-    if (data.agent_settings) {
-        const defaults = {
-            agent_name: 'Max',
-            company_name: config.defaults.companyName,
-            company_id: config.defaults.companyId,
-            delivery_price: config.defaults.deliveryPrice,
-            welcome_message: 'Ola! Sou o Max, assistente virtual. Como posso ajudar?',
-            active: true
-        };
-        data.agent_settings = { ...defaults, ...data.agent_settings };
-    }
+    // Aplica defaults do agent_settings (sempre, mesmo se nao existir)
+    const defaults = {
+        agent_name: 'Max',
+        company_name: config.defaults.companyName,
+        company_id: config.defaults.companyId,
+        delivery_price: config.defaults.deliveryPrice,
+        welcome_message: 'Ola! Sou o Max, assistente virtual. Como posso ajudar?',
+        active: true
+    };
+    data.agent_settings = { ...defaults, ...(data.agent_settings || {}) };
 
     const user = { id: doc.id, ...data };
 
