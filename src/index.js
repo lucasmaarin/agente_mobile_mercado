@@ -174,7 +174,8 @@ app.get('/dashboard', authRoutes.requireAuth, async (req, res) => {
 app.get('/onboarding', authRoutes.requireAuth, async (req, res) => {
     res.render('onboarding', {
         user: req.session.user,
-        metaAppId: config.meta.appId || ''
+        metaAppId: config.meta.appId || '',
+        metaConfigId: config.meta.configId || ''
     });
 });
 

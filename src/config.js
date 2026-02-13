@@ -24,7 +24,8 @@ module.exports = {
     // Meta App (para Embedded Signup)
     meta: {
         appId: process.env.META_APP_ID,
-        appSecret: process.env.META_APP_SECRET
+        appSecret: process.env.META_APP_SECRET,
+        configId: process.env.META_CONFIG_ID
     },
 
     // App defaults
