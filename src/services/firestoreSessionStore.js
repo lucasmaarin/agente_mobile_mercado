@@ -36,8 +36,11 @@ class FirestoreSessionStore extends Store {
         try {
             const expires = new Date(Date.now() + this.ttl * 1000);
 
+            // Serializa para JSON puro (Firestore nao aceita objetos com prototypes)
+            const plainSession = JSON.parse(JSON.stringify(sessionData));
+
             await this.db.collection(this.collection).doc(sid).set({
-                session: sessionData,
+                session: plainSession,
                 expires,
                 updatedAt: new Date()
             });

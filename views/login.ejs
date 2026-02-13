@@ -231,7 +231,9 @@
 
         // Enviar token para backend
         async function sendTokenToBackend(user) {
+            console.log('[Login] Enviando token para backend...');
             const idToken = await user.getIdToken();
+            console.log('[Login] Token obtido, fazendo fetch...');
 
             const response = await fetch('/auth/login', {
                 method: 'POST',
@@ -240,6 +242,7 @@
             });
 
             const data = await response.json();
+            console.log('[Login] Resposta do backend:', data);
 
             if (data.success) {
                 window.location.href = '/dashboard';
@@ -251,6 +254,7 @@
         // Login/Registro com email
         async function handleEmailAuth(event) {
             event.preventDefault();
+            console.log('[Login] handleEmailAuth chamado');
             showLoading();
 
             const email = document.getElementById('userEmail').value;
@@ -261,7 +265,9 @@
             try {
                 if (isLoginMode) {
                     // Login
+                    console.log('[Login] Tentando login com:', email);
                     const result = await firebase.auth().signInWithEmailAndPassword(email, password);
+                    console.log('[Login] Firebase auth OK:', result.user.uid);
                     await sendTokenToBackend(result.user);
                 } else {
                     // Registro
