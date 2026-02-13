@@ -97,14 +97,6 @@
                 <div class="bg-white rounded-xl shadow-sm p-6">
                     <h2 class="text-lg font-semibold text-gray-800 mb-4">Conexao WhatsApp</h2>
 
-                    <!-- QR Code Area -->
-                    <div id="qrCodeArea" class="hidden">
-                        <div class="bg-gray-50 rounded-lg p-4 text-center">
-                            <img id="qrCodeImg" src="" alt="QR Code" class="mx-auto max-w-[200px]">
-                            <p class="text-gray-500 text-sm mt-3">Escaneie com seu WhatsApp</p>
-                        </div>
-                    </div>
-
                     <!-- Connected State -->
                     <div id="connectedArea" class="hidden">
                         <div class="bg-green-50 rounded-lg p-4 text-center">
@@ -114,6 +106,7 @@
                                 </svg>
                             </div>
                             <p class="text-green-700 font-medium">WhatsApp Conectado!</p>
+                            <p id="connectedPhone" class="text-green-600 text-sm mt-1"></p>
                         </div>
                     </div>
 
@@ -126,14 +119,15 @@
                                 </svg>
                             </div>
                             <p class="text-gray-500">WhatsApp nao conectado</p>
+                            <p class="text-gray-400 text-sm mt-1">Configure seu numero para ativar o agente</p>
                         </div>
                     </div>
 
                     <!-- Botoes -->
                     <div class="mt-4 space-y-2">
-                        <button id="connectBtn" onclick="connectWhatsApp()" class="w-full bg-green-500 text-white rounded-lg px-4 py-3 font-medium hover:bg-green-600 transition-colors">
+                        <a id="connectBtn" href="/onboarding" class="block w-full bg-green-500 text-white rounded-lg px-4 py-3 font-medium hover:bg-green-600 transition-colors text-center">
                             Conectar WhatsApp
-                        </button>
+                        </a>
                         <button id="disconnectBtn" onclick="disconnectWhatsApp()" class="hidden w-full bg-red-500 text-white rounded-lg px-4 py-3 font-medium hover:bg-red-600 transition-colors">
                             Desconectar
                         </button>
@@ -211,17 +205,12 @@
     </div>
 
     <script>
-        let pollingInterval = null;
-
         // Inicializacao
         document.addEventListener('DOMContentLoaded', () => {
             loadSettings();
             loadStats();
             loadConversations();
             checkWhatsAppStatus();
-
-            // Polling para status do WhatsApp
-            pollingInterval = setInterval(checkWhatsAppStatus, 3000);
         });
 
         // Toast
@@ -379,35 +368,20 @@
             }
         }
 
-        // Conectar WhatsApp
-        async function connectWhatsApp() {
-            try {
-                document.getElementById('connectBtn').disabled = true;
-                document.getElementById('connectBtn').textContent = 'Conectando...';
-
-                const res = await fetch('/api/whatsapp/connect', { method: 'POST' });
-                const data = await res.json();
-
-                if (!data.success) {
-                    showToast(data.error || 'Erro ao conectar', true);
-                    document.getElementById('connectBtn').disabled = false;
-                    document.getElementById('connectBtn').textContent = 'Conectar WhatsApp';
-                }
-            } catch (error) {
-                showToast('Erro ao conectar', true);
-                document.getElementById('connectBtn').disabled = false;
-                document.getElementById('connectBtn').textContent = 'Conectar WhatsApp';
-            }
-        }
-
         // Desconectar WhatsApp
         async function disconnectWhatsApp() {
-            if (!confirm('Deseja realmente desconectar?')) return;
+            if (!confirm('Deseja realmente desconectar o WhatsApp? O agente deixara de responder.')) return;
 
             try {
-                await fetch('/api/whatsapp/disconnect', { method: 'POST' });
-                showToast('WhatsApp desconectado');
-                checkWhatsAppStatus();
+                const res = await fetch('/api/whatsapp/unregister', { method: 'DELETE' });
+                const data = await res.json();
+
+                if (data.success) {
+                    showToast('WhatsApp desconectado');
+                    checkWhatsAppStatus();
+                } else {
+                    showToast('Erro ao desconectar', true);
+                }
             } catch (error) {
                 showToast('Erro ao desconectar', true);
             }
@@ -419,7 +393,6 @@
                 const res = await fetch('/api/whatsapp/status');
                 const data = await res.json();
 
-                const qrArea = document.getElementById('qrCodeArea');
                 const connectedArea = document.getElementById('connectedArea');
                 const disconnectedArea = document.getElementById('disconnectedArea');
                 const connectBtn = document.getElementById('connectBtn');
@@ -428,33 +401,28 @@
                 const statStatus = document.getElementById('statStatus');
 
                 // Reset
-                qrArea.classList.add('hidden');
                 connectedArea.classList.add('hidden');
                 disconnectedArea.classList.add('hidden');
 
-                if (data.status === 'connected' || data.whatsapp_connected) {
+                if (data.status === 'configured') {
                     connectedArea.classList.remove('hidden');
                     connectBtn.classList.add('hidden');
                     disconnectBtn.classList.remove('hidden');
-                    statusIndicator.querySelector('div').classList.remove('bg-gray-400', 'bg-yellow-400');
+                    statusIndicator.querySelector('div').classList.remove('bg-gray-400');
                     statusIndicator.querySelector('div').classList.add('bg-green-500');
                     statStatus.textContent = 'Conectado';
                     statStatus.classList.add('text-green-600');
-                } else if (data.status === 'waiting_qr' && data.qrCode) {
-                    qrArea.classList.remove('hidden');
-                    document.getElementById('qrCodeImg').src = data.qrCode;
-                    connectBtn.classList.add('hidden');
-                    disconnectBtn.classList.add('hidden');
-                    statusIndicator.querySelector('div').classList.remove('bg-gray-400', 'bg-green-500');
-                    statusIndicator.querySelector('div').classList.add('bg-yellow-400');
-                    statStatus.textContent = 'Aguardando QR';
+
+                    // Mostra numero conectado
+                    const phoneEl = document.getElementById('connectedPhone');
+                    if (data.whatsapp?.phone_number) {
+                        phoneEl.textContent = data.whatsapp.phone_number;
+                    }
                 } else {
                     disconnectedArea.classList.remove('hidden');
                     connectBtn.classList.remove('hidden');
-                    connectBtn.disabled = false;
-                    connectBtn.textContent = 'Conectar WhatsApp';
                     disconnectBtn.classList.add('hidden');
-                    statusIndicator.querySelector('div').classList.remove('bg-green-500', 'bg-yellow-400');
+                    statusIndicator.querySelector('div').classList.remove('bg-green-500');
                     statusIndicator.querySelector('div').classList.add('bg-gray-400');
                     statStatus.textContent = 'Desconectado';
                     statStatus.classList.remove('text-green-600');

@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const firebase = require('../services/firebase');
+const config = require('../config');
 
 /**
  * POST /auth/login
@@ -8,6 +9,34 @@ const firebase = require('../services/firebase');
  */
 router.post('/login', async (req, res) => {
     try {
+        if (config.server.disableAuth) {
+            const uid = config.server.defaultUserId;
+            let user = await firebase.getUser(uid);
+            if (!user) {
+                user = await firebase.createUser(uid, {
+                    email: config.server.defaultUserEmail,
+                    name: config.server.defaultUserName,
+                    auth_provider: 'disabled'
+                });
+            }
+
+            req.session.userId = uid;
+            req.session.user = {
+                id: uid,
+                email: user.email,
+                name: user.name
+            };
+
+            return res.json({
+                success: true,
+                user: {
+                    id: uid,
+                    email: user.email,
+                    name: user.name
+                }
+            });
+        }
+
         const { idToken } = req.body;
 
         if (!idToken) {
@@ -79,6 +108,16 @@ router.post('/logout', (req, res) => {
  * Retorna usuario logado
  */
 router.get('/me', (req, res) => {
+    if (config.server.disableAuth) {
+        return res.json({
+            user: {
+                id: config.server.defaultUserId,
+                email: config.server.defaultUserEmail,
+                name: config.server.defaultUserName
+            }
+        });
+    }
+
     if (!req.session.userId) {
         return res.status(401).json({ error: 'Nao autenticado' });
     }
@@ -91,14 +130,41 @@ router.get('/me', (req, res) => {
 /**
  * Middleware de autenticacao
  */
-function requireAuth(req, res, next) {
-    if (!req.session.userId) {
-        if (req.xhr || req.headers.accept?.includes('application/json')) {
-            return res.status(401).json({ error: 'Nao autenticado' });
+async function requireAuth(req, res, next) {
+    try {
+        if (config.server.disableAuth) {
+            if (!req.session.userId) {
+                const uid = config.server.defaultUserId;
+                let user = await firebase.getUser(uid);
+                if (!user) {
+                    user = await firebase.createUser(uid, {
+                        email: config.server.defaultUserEmail,
+                        name: config.server.defaultUserName,
+                        auth_provider: 'disabled'
+                    });
+                }
+
+                req.session.userId = uid;
+                req.session.user = {
+                    id: uid,
+                    email: user.email,
+                    name: user.name
+                };
+            }
+
+            return next();
         }
-        return res.redirect('/login');
+
+        if (!req.session.userId) {
+            if (req.xhr || req.headers.accept?.includes('application/json')) {
+                return res.status(401).json({ error: 'Nao autenticado' });
+            }
+            return res.redirect('/login');
+        }
+        next();
+    } catch (error) {
+        next(error);
     }
-    next();
 }
 
 module.exports = router;

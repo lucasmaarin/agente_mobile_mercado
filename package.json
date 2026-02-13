@@ -1,30 +1,27 @@
 {
   "name": "whatsapp-sales-bot",
-  "version": "1.0.0",
-  "description": "Bot de vendas para WhatsApp com IA usando Baileys e OpenAI",
+  "version": "2.0.0",
+  "description": "Bot de vendas para WhatsApp com IA usando WhatsApp Business Cloud API e OpenAI",
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
     "dev": "node --watch src/index.js"
   },
   "dependencies": {
-    "@whiskeysockets/baileys": "^7.0.0-rc.9",
+    "axios": "^1.7.0",
     "dotenv": "^16.4.5",
     "ejs": "^3.1.10",
     "express": "^4.21.0",
     "express-session": "^1.18.0",
     "firebase-admin": "^12.6.0",
-    "openai": "^4.67.3",
-    "pino": "^9.4.0",
-    "qrcode": "^1.5.4",
-    "qrcode-terminal": "^0.12.0"
+    "openai": "^4.67.3"
   },
   "keywords": [
     "whatsapp",
     "bot",
     "sales",
     "openai",
-    "baileys"
+    "whatsapp-business-api"
   ],
   "author": "",
   "license": "MIT",

@@ -3,13 +3,31 @@ const config = require('../config');
 const path = require('path');
 
 // Inicializa Firebase Admin
-const serviceAccount = require(path.resolve(config.firebase.credentialsPath));
+// Suporta credenciais via arquivo (local) ou variavel de ambiente (Render/producao)
+let credential;
 
-admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount)
-});
+if (process.env.FIREBASE_CREDENTIALS_JSON) {
+    // Producao: credenciais via variavel de ambiente (JSON string)
+    const serviceAccount = JSON.parse(process.env.FIREBASE_CREDENTIALS_JSON);
+    credential = admin.credential.cert(serviceAccount);
+} else if (config.firebase.credentialsPath) {
+    // Local: credenciais via arquivo
+    const serviceAccount = require(path.resolve(config.firebase.credentialsPath));
+    credential = admin.credential.cert(serviceAccount);
+} else {
+    throw new Error('Firebase credentials not configured. Set FIREBASE_CREDENTIALS_JSON or FIREBASE_CREDENTIALS_PATH');
+}
+
+admin.initializeApp({ credential });
 
 const db = admin.firestore();
+
+const PRODUCTS_CACHE_TTL_MS = parseInt(process.env.PRODUCTS_CACHE_TTL_MS || '60000', 10);
+const productsCache = new Map();
+
+// Cache de mapeamento phone_number_id → userId para performance
+const phoneNumberIdCache = new Map();
+const PHONE_CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutos
 
 // ==================== USERS ====================
 
@@ -123,6 +141,31 @@ async function saveConversation(userId, phone, messages, cart = [], customerData
         .collection('conversations').doc(phone).set(data, { merge: true });
 }
 
+async function saveAutomationConversation(userId, phone, messages, cart = [], customerData = null, agentSettings = null) {
+    const rootRef = db.collection('Automacoes').doc(userId);
+    const rootData = {
+        updatedAt: admin.firestore.FieldValue.serverTimestamp()
+    };
+
+    if (agentSettings) {
+        rootData.agent_settings = agentSettings;
+    }
+
+    await rootRef.set(rootData, { merge: true });
+
+    const convData = {
+        messages,
+        cart,
+        updatedAt: admin.firestore.FieldValue.serverTimestamp()
+    };
+
+    if (customerData) {
+        convData.customerData = customerData;
+    }
+
+    await rootRef.collection('conversations').doc(phone).set(convData, { merge: true });
+}
+
 async function getRecentConversations(userId, limit = 20) {
     const snapshot = await db.collection('users').doc(userId)
         .collection('conversations')
@@ -150,6 +193,13 @@ async function getProducts(companyId, limit = 50) {
         return [];
     }
 
+    const cacheKey = `${companyId}`;
+    const cached = productsCache.get(cacheKey);
+    const now = Date.now();
+    if (cached && (now - cached.fetchedAt) < PRODUCTS_CACHE_TTL_MS && cached.items.length >= limit) {
+        return cached.items.slice(0, limit);
+    }
+
     const snapshot = await db.collection('estabelecimentos').doc(companyId)
         .collection('Products')
         .where('isActive', '==', true)
@@ -157,7 +207,7 @@ async function getProducts(companyId, limit = 50) {
         .limit(limit)
         .get();
 
-    return snapshot.docs.map(doc => {
+    const items = snapshot.docs.map(doc => {
         const data = doc.data();
         return {
             id: doc.id,
@@ -171,6 +221,9 @@ async function getProducts(companyId, limit = 50) {
             barCode: data.barCode
         };
     });
+
+    productsCache.set(cacheKey, { items, fetchedAt: now });
+    return items;
 }
 
 async function searchProducts(companyId, query) {
@@ -403,6 +456,112 @@ async function getStats(userId) {
     };
 }
 
+// ==================== WHATSAPP CREDENTIALS ====================
+
+async function getUserByPhoneNumberId(phoneNumberId) {
+    if (!phoneNumberId) return null;
+
+    // Verifica cache
+    const cached = phoneNumberIdCache.get(phoneNumberId);
+    if (cached && (Date.now() - cached.fetchedAt) < PHONE_CACHE_TTL_MS) {
+        return cached.user;
+    }
+
+    // Query no Firestore
+    const snapshot = await db.collection('users')
+        .where('whatsapp.phone_number_id', '==', phoneNumberId)
+        .limit(1)
+        .get();
+
+    if (snapshot.empty) return null;
+
+    const doc = snapshot.docs[0];
+    const data = doc.data();
+
+    // Aplica defaults do agent_settings
+    if (data.agent_settings) {
+        const defaults = {
+            agent_name: 'Max',
+            company_name: config.defaults.companyName,
+            company_id: config.defaults.companyId,
+            delivery_price: config.defaults.deliveryPrice,
+            welcome_message: 'Ola! Sou o Max, assistente virtual. Como posso ajudar?',
+            active: true
+        };
+        data.agent_settings = { ...defaults, ...data.agent_settings };
+    }
+
+    const user = { id: doc.id, ...data };
+
+    // Salva no cache
+    phoneNumberIdCache.set(phoneNumberId, { user, fetchedAt: Date.now() });
+
+    return user;
+}
+
+async function saveWhatsAppCredentials(userId, credentials) {
+    const data = {
+        whatsapp: {
+            phone_number_id: credentials.phone_number_id,
+            access_token: credentials.access_token,
+            business_account_id: credentials.business_account_id || '',
+            phone_number: credentials.phone_number || '',
+            connected_at: admin.firestore.FieldValue.serverTimestamp()
+        }
+    };
+
+    await db.collection('users').doc(userId).update(data);
+
+    // Invalida cache
+    phoneNumberIdCache.delete(credentials.phone_number_id);
+
+    return data.whatsapp;
+}
+
+async function removeWhatsAppCredentials(userId) {
+    // Busca user para invalidar cache
+    const user = await getUser(userId);
+    if (user?.whatsapp?.phone_number_id) {
+        phoneNumberIdCache.delete(user.whatsapp.phone_number_id);
+    }
+
+    await db.collection('users').doc(userId).update({
+        whatsapp: admin.firestore.FieldValue.delete()
+    });
+}
+
+async function bulkSaveWhatsAppCredentials(entries) {
+    const results = [];
+    // Firestore batch limit: 500 operacoes
+    const batchSize = 500;
+
+    for (let i = 0; i < entries.length; i += batchSize) {
+        const batch = db.batch();
+        const chunk = entries.slice(i, i + batchSize);
+
+        for (const entry of chunk) {
+            const ref = db.collection('users').doc(entry.userId);
+            batch.update(ref, {
+                whatsapp: {
+                    phone_number_id: entry.phone_number_id,
+                    access_token: entry.access_token,
+                    business_account_id: entry.business_account_id || '',
+                    phone_number: entry.phone_number || '',
+                    connected_at: admin.firestore.Timestamp.now()
+                }
+            });
+            results.push({ userId: entry.userId, status: 'ok' });
+        }
+
+        await batch.commit();
+    }
+
+    // Limpa cache completo apos bulk
+    phoneNumberIdCache.clear();
+
+    return results;
+}
+
 module.exports = {
     db,
     admin,
@@ -414,9 +573,15 @@ module.exports = {
     updateAgentSettings,
     incrementMessageCount,
     incrementOrderCount,
+    // WhatsApp Credentials
+    getUserByPhoneNumberId,
+    saveWhatsAppCredentials,
+    removeWhatsAppCredentials,
+    bulkSaveWhatsAppCredentials,
     // Conversations
     getConversation,
     saveConversation,
+    saveAutomationConversation,
     getRecentConversations,
     clearConversation,
     // Products

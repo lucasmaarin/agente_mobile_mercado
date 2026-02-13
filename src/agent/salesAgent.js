@@ -24,12 +24,57 @@ const PAYMENT_TYPES = {
     '4': 'PaymentType.pix'
 };
 
+function normalizeText(value) {
+    return String(value || '')
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9]+/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+}
+
+function extractShoppingListCount(text) {
+    const lines = String(text || '').split(/\r?\n/);
+    let count = 0;
+    for (const line of lines) {
+        if (/^\s*[\-\*\u2022]\s+\S+/.test(line)) count += 1;
+        if (/^\s*\d+\s*[\).\-\:]\s+\S+/.test(line)) count += 1;
+    }
+    if (count === 0 && /lista/.test(normalizeText(text))) {
+        const commaCount = (text.match(/,/g) || []).length;
+        if (commaCount >= 1) {
+            count = commaCount + 1;
+        }
+    }
+    return count;
+}
+
+function extractShoppingListItems(text) {
+    const lines = String(text || '').split(/\r?\n/);
+    const items = [];
+    for (const line of lines) {
+        const bulletMatch = line.match(/^\s*[\-\*\u2022]\s+(.+)$/);
+        const numberedMatch = line.match(/^\s*\d+\s*[\).\-\:]\s+(.+)$/);
+        const value = (bulletMatch?.[1] || numberedMatch?.[1] || '').trim();
+        if (value) items.push(value);
+    }
+    if (items.length === 0 && /lista/.test(normalizeText(text))) {
+        const parts = text.split(/,\s*/).map(p => p.trim()).filter(Boolean);
+        if (parts.length >= 2) return parts;
+    }
+    return items;
+}
+
 /**
  * Gera o prompt do sistema
  */
 function buildSystemPrompt(settings, products, cart, flowState, customerData) {
     const productsList = products.length > 0
-        ? products.slice(0, 20).map(p => `- ${p.name}: R$ ${p.price.toFixed(2)} (ID: ${p.id})`).join('\n')
+        ? products.slice(0, 20).map(p => {
+            const photoTag = p.image ? ` [IMG:${p.image}]` : '';
+            return `- ${p.name}: R$ ${p.price.toFixed(2)} (ID: ${p.id})${photoTag}`;
+        }).join('\n')
         : 'Nenhum produto disponivel';
 
     const cartList = cart.length > 0
@@ -49,6 +94,10 @@ ESTADO ATUAL: Cliente navegando/comprando
 - Para adicionar: responda e inclua [ADD:ID_PRODUTO:QUANTIDADE]
 - Para remover: responda e inclua [REMOVE:ID_PRODUTO]
 - Quando cliente quiser FINALIZAR/FECHAR pedido: responda e inclua [START_CHECKOUT]`;
+        if (customerData?.listMode?.active) {
+            stateInstructions += `
+- O cliente enviou uma lista. Escolha a melhor marca para o item atual, apresente o que escolheu e pergunte se deseja alterar. Depois de confirmar, siga para o proximo item da lista.`;
+        }
     } else if (flowState === FLOW_STATES.CONFIRMING_ORDER) {
         stateInstructions = `
 ESTADO ATUAL: Confirmando pedido
@@ -71,6 +120,12 @@ REGRAS:
 - Respostas CURTAS (2-3 linhas)
 - Seja simpatico e direto
 - Use 1-2 emojis por mensagem
+- Responda apenas perguntas relacionadas a vendas de supermercado e pedidos; para outros assuntos, redirecione para os produtos e o carrinho.
+- Quando recomendar itens, inclua a foto do produto usando a tag interna [IMG:URL] (nao exiba o link no texto).
+- Atue como vendedor de varejo experiente e persuasivo, sem ser insistente.
+- Se citar ou recomendar um produto, copie a tag [IMG:URL] da lista de produtos e coloque no FINAL da resposta (uma por produto).
+- Padrao de apresentacao: 1) texto curto apresentando e sugerindo o produto 2) finalize com uma pergunta de acao 3) depois envie a imagem (tag [IMG:URL] no final).
+- Recomende apenas 1 produto por vez.
 
 PRODUTOS DISPONIVEIS:
 ${productsList}
@@ -98,6 +153,34 @@ async function processMessage(userId, phone, text, pushName, user) {
     let cart = conversation?.cart || [];
     let customerData = conversation?.customerData || {};
     let flowState = customerData.flowState || FLOW_STATES.BROWSING;
+
+    // Se o cliente pedir outra opcao, libera repetir recomendacoes
+    const normalizedUserText = normalizeText(text);
+    const wantsDifferent = /(outra opcao|outra opção|algo diferente|alguma outra|mais alguma opcao|mais alguma opção|outra sugestao|outra sugestão|me recomende outro|tem outro)/.test(normalizedUserText);
+    if (wantsDifferent) {
+        delete customerData.lastRecommendedProductId;
+    }
+
+    // Detecta envio de lista de compras e ativa modo lista
+    const listCount = extractShoppingListCount(text);
+    if (customerData.listMode?.ignoreListDetection) {
+        customerData.listMode.ignoreListDetection = false;
+    } else if (flowState === FLOW_STATES.BROWSING && !customerData.listMode && listCount >= 2) {
+        const listItems = extractShoppingListItems(text);
+        if (listItems.length < 2) {
+            // Evita ativar modo lista para item unico
+        } else {
+            customerData.listMode = {
+                total: listCount,
+                done: 0,
+                items: listItems,
+                index: 0,
+                ignoreListDetection: false,
+                active: true
+            };
+            customerData.pendingListText = text;
+        }
+    }
 
     // Limita historico
     if (messages.length > 10) {
@@ -206,6 +289,55 @@ async function processMessage(userId, phone, text, pushName, user) {
         }
     }
 
+    // Se o agente recomendou produtos, garante envio da imagem junto (uma por produto citado)
+    if (flowState === FLOW_STATES.BROWSING && response) {
+        const normalizedResponse = normalizeText(response);
+
+        const isRecommendation = /(recomendo|recomendar|sugiro|sugestao|que tal|experimente|vale a pena|ideal para|perfeito para)/.test(normalizedResponse);
+        const isCartAction = /(vou adicionar|adicionei|adicionar ao seu carrinho|finalizar|checkout|fechar pedido|pedido confirmado|resumo do pedido|confirmar pedido)/.test(normalizedResponse);
+
+        if (isRecommendation && !isCartAction) {
+            const responseTokens = new Set(normalizedResponse.split(' ').filter(Boolean));
+            const mentioned = [];
+            const seen = new Set();
+
+            for (const p of products) {
+            if (!p?.image || !p?.name) continue;
+            const nameNorm = normalizeText(p.name);
+            if (!nameNorm) continue;
+
+            const nameTokens = nameNorm.split(' ').filter(Boolean);
+            const minTokens = nameTokens.length >= 3 ? 2 : nameTokens.length;
+            let hits = 0;
+            for (const t of nameTokens) {
+                if (responseTokens.has(t)) hits += 1;
+            }
+
+            const matchesByTokens = hits >= minTokens;
+            const matchesBySubstring = normalizedResponse.includes(nameNorm);
+            const matchesById = normalizedResponse.includes(normalizeText(p.id));
+
+            if (matchesBySubstring || matchesByTokens || matchesById) {
+                if (!seen.has(p.id)) {
+                    seen.add(p.id);
+                    mentioned.push(p);
+                }
+            }
+        }
+
+            if (mentioned.length > 0) {
+                const first = mentioned[0];
+                const lastRecommendedId = customerData?.lastRecommendedProductId;
+                if (first.id && lastRecommendedId && String(first.id) === String(lastRecommendedId)) {
+                    // Evita recomendar o mesmo produto em sequencia
+                } else {
+                    response = `${response.trim()}\n[IMG:${first.image}]`;
+                    customerData.lastRecommendedProductId = first.id;
+                }
+            }
+        }
+    }
+
     // Processa tags de acao na resposta
     let cleanResponse = response;
 
@@ -244,6 +376,22 @@ async function processMessage(userId, phone, text, pushName, user) {
             }
         }
         cleanResponse = response.replace(/\[ADD:[^\]]+\]/g, '').trim();
+        if (customerData.listMode?.total) {
+            customerData.listMode.done += 1;
+            customerData.listMode.index += 1;
+            const nextItem = customerData.listMode.items?.[customerData.listMode.index];
+            if (customerData.listMode.done >= customerData.listMode.total || !nextItem) {
+                delete customerData.listMode;
+                cleanResponse = `${cleanResponse}\n\nLista completa! Quer finalizar o carrinho?`;
+            } else {
+                cleanResponse = `${cleanResponse}\n\nProximo da lista: ${nextItem}.`;
+            }
+        } else {
+            const hasQuestion = /\?\s*$/.test(cleanResponse);
+            if (!hasQuestion) {
+                cleanResponse = `${cleanResponse}\n\nQuer aproveitar e incluir mais algum item para complementar?`;
+            }
+        }
     }
 
     // [REMOVE:id]
@@ -263,6 +411,7 @@ async function processMessage(userId, phone, text, pushName, user) {
     messages.push({ role: 'assistant', content: cleanResponse });
 
     await firebase.saveConversation(userId, phone, messages, cart, customerData);
+    await firebase.saveAutomationConversation(userId, phone, messages, cart, customerData, settings);
 
     return cleanResponse;
 }

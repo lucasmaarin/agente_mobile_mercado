@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conectar WhatsApp</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f0f2f5;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+            padding: 40px;
+            max-width: 520px;
+            width: 90%;
+            text-align: center;
+        }
+        .logo { font-size: 48px; margin-bottom: 16px; }
+        h1 { font-size: 22px; color: #1a1a1a; margin-bottom: 8px; }
+        .subtitle {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 24px;
+            line-height: 1.5;
+        }
+        .form-group {
+            text-align: left;
+            margin-bottom: 16px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 6px;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: #25D366;
+        }
+        .form-group .help {
+            font-size: 12px;
+            color: #888;
+            margin-top: 4px;
+        }
+        .btn-whatsapp {
+            background: #25D366;
+            color: #fff;
+            border: none;
+            padding: 14px 32px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            transition: background 0.2s;
+            margin-top: 8px;
+        }
+        .btn-whatsapp:hover { background: #1da851; }
+        .btn-whatsapp:disabled { background: #ccc; cursor: not-allowed; }
+        .status {
+            margin-top: 20px;
+            padding: 14px;
+            border-radius: 8px;
+            font-size: 14px;
+            display: none;
+        }
+        .status.success {
+            display: block;
+            background: #e8f5e9;
+            color: #2e7d32;
+            border: 1px solid #a5d6a7;
+        }
+        .status.error {
+            display: block;
+            background: #fce4ec;
+            color: #c62828;
+            border: 1px solid #ef9a9a;
+        }
+        .status.loading {
+            display: block;
+            background: #e3f2fd;
+            color: #1565c0;
+            border: 1px solid #90caf9;
+        }
+        .connected-info {
+            margin-top: 24px;
+            padding: 20px;
+            background: #e8f5e9;
+            border-radius: 8px;
+            border: 1px solid #a5d6a7;
+        }
+        .connected-info h3 { color: #2e7d32; margin-bottom: 8px; font-size: 16px; }
+        .connected-info p { color: #333; font-size: 14px; margin: 4px 0; }
+        .btn-disconnect {
+            margin-top: 16px;
+            background: #f44336;
+            color: #fff;
+            border: none;
+            padding: 10px 24px;
+            font-size: 14px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .btn-disconnect:hover { background: #d32f2f; }
+        .btn-back {
+            display: inline-block;
+            margin-top: 20px;
+            color: #666;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        .btn-back:hover { color: #333; }
+        .steps {
+            text-align: left;
+            margin-bottom: 24px;
+            padding: 16px;
+            background: #fafafa;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+        .steps h3 { font-size: 14px; color: #333; margin-bottom: 10px; }
+        .steps ol { padding-left: 20px; color: #555; font-size: 13px; line-height: 1.8; }
+        .tabs {
+            display: flex;
+            margin-bottom: 24px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        .tab {
+            flex: 1;
+            padding: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #888;
+            background: none;
+            border: none;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+            transition: all 0.2s;
+        }
+        .tab.active {
+            color: #25D366;
+            border-bottom-color: #25D366;
+        }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">📱</div>
+        <h1>Conectar WhatsApp Business</h1>
+        <p class="subtitle">
+            Conecte o numero WhatsApp do seu estabelecimento para ativar o atendimento automatico com IA.
+        </p>
+
+        <div id="current-status"></div>
+
+        <div id="connect-section">
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('manual')">Configuracao Manual</button>
+                <button class="tab" onclick="switchTab('embedded')">Embedded Signup</button>
+            </div>
+
+            <!-- Tab: Manual -->
+            <div id="tab-manual" class="tab-content active">
+                <div class="steps">
+                    <h3>Onde encontrar essas informacoes:</h3>
+                    <ol>
+                        <li>Acesse <strong>developers.facebook.com</strong> > seu app > WhatsApp > Configuracao da API</li>
+                        <li>Copie o <strong>Phone Number ID</strong> e o <strong>Access Token</strong></li>
+                        <li>O <strong>Business Account ID</strong> esta em Configuracao da Conta</li>
+                    </ol>
+                </div>
+
+                <form onsubmit="registerManual(event)">
+                    <div class="form-group">
+                        <label>Access Token</label>
+                        <input type="text" id="accessToken" placeholder="EAAxxxxxxx..." required>
+                        <p class="help">Token permanente (System User) ou temporario</p>
+                    </div>
+                    <div class="form-group">
+                        <label>Phone Number ID</label>
+                        <input type="text" id="phoneNumberId" placeholder="Ex: 123456789012345" required>
+                        <p class="help">Identificacao do numero de telefone no painel do Meta</p>
+                    </div>
+                    <div class="form-group">
+                        <label>Business Account ID</label>
+                        <input type="text" id="businessAccountId" placeholder="Ex: 987654321012345" required>
+                        <p class="help">Identificacao da conta do WhatsApp Business</p>
+                    </div>
+                    <div class="form-group">
+                        <label>Numero de Telefone</label>
+                        <input type="text" id="phoneNumber" placeholder="Ex: +5511999999999" required>
+                        <p class="help">Numero com codigo do pais</p>
+                    </div>
+                    <button type="submit" id="btn-manual" class="btn-whatsapp">Conectar WhatsApp</button>
+                </form>
+            </div>
+
+            <!-- Tab: Embedded Signup -->
+            <div id="tab-embedded" class="tab-content">
+                <div class="steps">
+                    <h3>O que vai acontecer:</h3>
+                    <ol>
+                        <li>Uma janela do Facebook vai abrir</li>
+                        <li>Faca login na sua conta Meta Business</li>
+                        <li>Selecione ou crie uma conta WhatsApp Business</li>
+                        <li>Registre o numero de telefone do seu estabelecimento</li>
+                        <li>Pronto! O bot comeca a funcionar automaticamente</li>
+                    </ol>
+                </div>
+                <% if (metaAppId) { %>
+                    <button id="btn-connect" class="btn-whatsapp" onclick="launchEmbeddedSignup()">Conectar via Facebook</button>
+                <% } else { %>
+                    <p style="color: #888; font-size: 14px; padding: 20px 0;">Embedded Signup nao disponivel. Configure META_APP_ID no servidor.</p>
+                <% } %>
+            </div>
+        </div>
+
+        <div id="status-message" class="status"></div>
+
+        <a href="/dashboard" class="btn-back">&larr; Voltar ao Dashboard</a>
+    </div>
+
+    <!-- Facebook SDK (somente para Embedded Signup) -->
+    <% if (metaAppId) { %>
+    <script>
+        window.fbAsyncInit = function() {
+            FB.init({
+                appId: '<%= metaAppId %>',
+                autoLogAppEvents: true,
+                xfbml: false,
+                version: 'v21.0'
+            });
+        };
+    </script>
+    <script async defer crossorigin="anonymous" src="https://connect.facebook.net/pt_BR/sdk.js"></script>
+    <% } %>
+
+    <script>
+        const statusEl = document.getElementById('status-message');
+        const connectSection = document.getElementById('connect-section');
+        const currentStatusEl = document.getElementById('current-status');
+
+        checkCurrentStatus();
+
+        // Tabs
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.getElementById('tab-' + tab).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Verifica status atual
+        async function checkCurrentStatus() {
+            try {
+                const res = await fetch('/api/whatsapp/status');
+                const data = await res.json();
+
+                if (data.status === 'configured') {
+                    currentStatusEl.innerHTML = `
+                        <div class="connected-info">
+                            <h3>WhatsApp Conectado</h3>
+                            <p><strong>Numero:</strong> ${data.whatsapp.phone_number || 'N/A'}</p>
+                            <p><strong>ID:</strong> ${data.whatsapp.phone_number_id}</p>
+                            <button class="btn-disconnect" onclick="disconnectWhatsApp()">Desconectar</button>
+                        </div>
+                    `;
+                    connectSection.style.display = 'none';
+                }
+            } catch (err) {
+                console.error('Erro ao verificar status:', err);
+            }
+        }
+
+        // Registro manual
+        async function registerManual(event) {
+            event.preventDefault();
+            showStatus('loading', 'Validando e conectando...');
+            document.getElementById('btn-manual').disabled = true;
+
+            try {
+                const res = await fetch('/api/whatsapp/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        access_token: document.getElementById('accessToken').value.trim(),
+                        phone_number_id: document.getElementById('phoneNumberId').value.trim(),
+                        business_account_id: document.getElementById('businessAccountId').value.trim(),
+                        phone_number: document.getElementById('phoneNumber').value.trim()
+                    })
+                });
+
+                const data = await res.json();
+
+                if (data.success) {
+                    showStatus('success', 'WhatsApp conectado com sucesso! O bot ja esta ativo.');
+                    connectSection.style.display = 'none';
+                    checkCurrentStatus();
+                } else {
+                    showStatus('error', data.error || 'Erro ao conectar. Verifique as credenciais.');
+                    document.getElementById('btn-manual').disabled = false;
+                }
+            } catch (err) {
+                showStatus('error', 'Erro de conexao com o servidor.');
+                document.getElementById('btn-manual').disabled = false;
+            }
+        }
+
+        // Embedded Signup
+        function launchEmbeddedSignup() {
+            if (typeof FB === 'undefined') {
+                showStatus('error', 'Facebook SDK ainda carregando. Tente novamente em alguns segundos.');
+                return;
+            }
+
+            FB.login(function(response) {
+                if (response.authResponse) {
+                    const code = response.authResponse.code;
+                    if (code) {
+                        processSignupCode(code);
+                    } else {
+                        showStatus('error', 'Nao foi possivel obter o codigo de autorizacao.');
+                    }
+                } else {
+                    showStatus('error', 'Login cancelado ou nao autorizado.');
+                }
+            }, {
+                config_id: '<%= metaAppId %>',
+                response_type: 'code',
+                override_default_response_type: true,
+                extras: {
+                    feature: 'whatsapp_embedded_signup',
+                    sessionInfoVersion: 2
+                }
+            });
+        }
+
+        async function processSignupCode(code) {
+            showStatus('loading', 'Conectando seu WhatsApp... Aguarde.');
+            document.getElementById('btn-connect').disabled = true;
+
+            try {
+                const res = await fetch('/api/whatsapp/embedded-signup', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ code })
+                });
+
+                const data = await res.json();
+
+                if (data.success) {
+                    showStatus('success', `WhatsApp conectado! Numero: ${data.whatsapp.phone_number}`);
+                    connectSection.style.display = 'none';
+                    checkCurrentStatus();
+                } else {
+                    showStatus('error', data.error || 'Erro ao conectar.');
+                    document.getElementById('btn-connect').disabled = false;
+                }
+            } catch (err) {
+                showStatus('error', 'Erro de conexao com o servidor.');
+                document.getElementById('btn-connect').disabled = false;
+            }
+        }
+
+        // Desconectar
+        async function disconnectWhatsApp() {
+            if (!confirm('Tem certeza? O bot deixara de responder.')) return;
+
+            try {
+                const res = await fetch('/api/whatsapp/unregister', { method: 'DELETE' });
+                const data = await res.json();
+
+                if (data.success) {
+                    currentStatusEl.innerHTML = '';
+                    connectSection.style.display = '';
+                    showStatus('success', 'WhatsApp desconectado.');
+                }
+            } catch (err) {
+                showStatus('error', 'Erro ao desconectar.');
+            }
+        }
+
+        function showStatus(type, message) {
+            statusEl.className = 'status ' + type;
+            statusEl.textContent = message;
+        }
+    </script>
+</body>
+</html>

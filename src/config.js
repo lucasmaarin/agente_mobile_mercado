@@ -15,6 +15,18 @@ module.exports = {
         authDomain: process.env.FIREBASE_AUTH_DOMAIN
     },
 
+    // WhatsApp Business Cloud API (configs globais - credenciais sao por usuario no Firebase)
+    whatsapp: {
+        verifyToken: process.env.WHATSAPP_VERIFY_TOKEN || 'zerograu_webhook_token',
+        apiVersion: process.env.WHATSAPP_API_VERSION || 'v21.0'
+    },
+
+    // Meta App (para Embedded Signup)
+    meta: {
+        appId: process.env.META_APP_ID,
+        appSecret: process.env.META_APP_SECRET
+    },
+
     // App defaults
     defaults: {
         companyId: process.env.COMPANY_ID,
@@ -25,7 +37,11 @@ module.exports = {
     // Server
     server: {
         port: parseInt(process.env.PORT) || 3000,
-        sessionSecret: process.env.SESSION_SECRET || 'change-me-in-production'
+        sessionSecret: process.env.SESSION_SECRET || 'change-me-in-production',
+        disableAuth: process.env.DISABLE_AUTH === 'true',
+        defaultUserId: process.env.DEFAULT_USER_ID || 'local-admin',
+        defaultUserEmail: process.env.DEFAULT_USER_EMAIL || 'local@local',
+        defaultUserName: process.env.DEFAULT_USER_NAME || 'Local Admin'
     },
 
     // Debug
