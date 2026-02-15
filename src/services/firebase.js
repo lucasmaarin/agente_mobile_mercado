@@ -527,38 +527,6 @@ async function removeWhatsAppCredentials(userId) {
     });
 }
 
-async function bulkSaveWhatsAppCredentials(entries) {
-    const results = [];
-    // Firestore batch limit: 500 operacoes
-    const batchSize = 500;
-
-    for (let i = 0; i < entries.length; i += batchSize) {
-        const batch = db.batch();
-        const chunk = entries.slice(i, i + batchSize);
-
-        for (const entry of chunk) {
-            const ref = db.collection('users').doc(entry.userId);
-            batch.update(ref, {
-                whatsapp: {
-                    phone_number_id: entry.phone_number_id,
-                    access_token: entry.access_token,
-                    business_account_id: entry.business_account_id || '',
-                    phone_number: entry.phone_number || '',
-                    connected_at: admin.firestore.Timestamp.now()
-                }
-            });
-            results.push({ userId: entry.userId, status: 'ok' });
-        }
-
-        await batch.commit();
-    }
-
-    // Limpa cache completo apos bulk
-    phoneNumberIdCache.clear();
-
-    return results;
-}
-
 module.exports = {
     db,
     admin,
@@ -574,7 +542,6 @@ module.exports = {
     getUserByPhoneNumberId,
     saveWhatsAppCredentials,
     removeWhatsAppCredentials,
-    bulkSaveWhatsAppCredentials,
     // Conversations
     getConversation,
     saveConversation,

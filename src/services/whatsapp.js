@@ -79,71 +79,6 @@ async function markAsRead(credentials, messageId) {
 }
 
 /**
- * Valida credenciais fazendo uma chamada de teste a API
- */
-async function validateCredentials(accessToken, phoneNumberId) {
-    const baseHeaders = { headers: { 'Authorization': `Bearer ${accessToken}` } };
-    try {
-        // Verifica se o token tem acesso direto ao phone_number_id informado
-        const response = await axios.get(
-            `https://graph.facebook.com/${API_VERSION}/${phoneNumberId}`,
-            {
-                ...baseHeaders,
-                params: { fields: 'id,display_phone_number,verified_name' }
-            }
-        );
-        return { valid: true, data: response.data };
-    } catch (err) {
-        const metaMessage = err.response?.data?.error?.message || err.message;
-
-        // Se possivel, tenta validar o token vs WABA para erro mais claro
-        const appId = config.meta?.appId;
-        const appSecret = config.meta?.appSecret;
-        if (appId && appSecret) {
-            try {
-                const debugResponse = await axios.get(
-                    `https://graph.facebook.com/${API_VERSION}/debug_token`,
-                    {
-                        params: {
-                            input_token: accessToken,
-                            access_token: `${appId}|${appSecret}`
-                        }
-                    }
-                );
-
-                const granularScopes = debugResponse.data?.data?.granular_scopes || [];
-                const wabaScope = granularScopes.find(s => s.scope === 'whatsapp_business_management');
-                const wabaIds = wabaScope?.target_ids || [];
-
-                if (wabaIds.length > 0) {
-                    for (const wabaId of wabaIds) {
-                        const phonesResponse = await axios.get(
-                            `https://graph.facebook.com/${API_VERSION}/${wabaId}/phone_numbers`,
-                            baseHeaders
-                        );
-                        const phoneNumbers = phonesResponse.data?.data || [];
-                        const match = phoneNumbers.find(p => p.id === String(phoneNumberId));
-                        if (match) {
-                            // O token tem acesso ao WABA, mas a consulta direta falhou
-                            break;
-                        }
-                    }
-
-                    return {
-                        valid: false,
-                        error: 'Token nao tem acesso ao phone_number_id informado. Gere um token para o mesmo numero/WABA usado no webhook.'
-                    };
-                }
-            } catch (debugErr) {
-                // Fallback para mensagem original se debug falhar
-            }
-        }
-
-        return { valid: false, error: metaMessage };
-    }
-}
-
-/**
  * Extrai dados da mensagem recebida via webhook
  */
 function parseWebhookMessage(body) {
@@ -204,7 +139,6 @@ module.exports = {
     sendMessage,
     sendImageMessage,
     markAsRead,
-    validateCredentials,
     parseWebhookMessage,
     verifyWebhook
 };
