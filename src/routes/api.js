@@ -12,51 +12,6 @@ router.use(requireAuth);
 // ==================== WHATSAPP ONBOARDING ====================
 
 /**
- * POST /api/whatsapp/register
- * Registra credenciais WhatsApp do usuario logado
- */
-router.post('/whatsapp/register', async (req, res) => {
-    try {
-        const userId = req.session.userId;
-        const { access_token, phone_number_id, business_account_id, phone_number } = req.body;
-
-        if (!access_token || !phone_number_id) {
-            return res.status(400).json({ error: 'access_token e phone_number_id sao obrigatorios' });
-        }
-
-        // Valida credenciais na API do Meta
-        const validation = await whatsapp.validateCredentials(access_token, phone_number_id);
-        if (!validation.valid) {
-            return res.status(400).json({
-                error: 'Credenciais invalidas',
-                details: validation.error
-            });
-        }
-
-        // Salva no Firebase
-        const saved = await firebase.saveWhatsAppCredentials(userId, {
-            access_token,
-            phone_number_id,
-            business_account_id: business_account_id || '',
-            phone_number: phone_number || ''
-        });
-        await firebase.updateWhatsAppStatus(userId, true);
-
-        res.json({
-            success: true,
-            whatsapp: {
-                phone_number_id: saved.phone_number_id,
-                phone_number: saved.phone_number,
-                status: 'connected'
-            }
-        });
-    } catch (error) {
-        console.error('Erro ao registrar WhatsApp:', error);
-        res.status(500).json({ error: error.message });
-    }
-});
-
-/**
  * DELETE /api/whatsapp/unregister
  * Remove credenciais WhatsApp do usuario logado
  */
@@ -267,43 +222,6 @@ router.post('/whatsapp/embedded-signup', async (req, res) => {
         res.status(500).json({
             error: metaError?.message || error.message
         });
-    }
-});
-
-// ==================== ADMIN - BULK REGISTER ====================
-
-/**
- * POST /api/admin/bulk-register
- * Cadastra credenciais WhatsApp para multiplos estabelecimentos de uma vez
- * Body: { entries: [{ userId, access_token, phone_number_id, phone_number, business_account_id }] }
- */
-router.post('/admin/bulk-register', async (req, res) => {
-    try {
-        const { entries } = req.body;
-
-        if (!Array.isArray(entries) || entries.length === 0) {
-            return res.status(400).json({ error: 'entries deve ser um array com pelo menos 1 item' });
-        }
-
-        // Valida formato
-        const invalid = entries.filter(e => !e.userId || !e.access_token || !e.phone_number_id);
-        if (invalid.length > 0) {
-            return res.status(400).json({
-                error: `${invalid.length} entradas invalidas. Campos obrigatorios: userId, access_token, phone_number_id`,
-                invalid_user_ids: invalid.map(e => e.userId || 'sem_userId')
-            });
-        }
-
-        const results = await firebase.bulkSaveWhatsAppCredentials(entries);
-
-        res.json({
-            success: true,
-            total: results.length,
-            results
-        });
-    } catch (error) {
-        console.error('Erro no bulk register:', error);
-        res.status(500).json({ error: error.message });
     }
 });
 
