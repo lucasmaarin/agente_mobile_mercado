@@ -5,3 +5,13 @@ render-env.txt
 *.log
 .claude/
 anotacoes.txt
+
+# JSON files (credenciais, exports, dados locais)
+*.json
+!package.json
+!package-lock.json
+
+# Arquivos de dados locais
+pedido.json
+produto.json
+endereco.json

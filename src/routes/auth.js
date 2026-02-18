@@ -45,33 +45,38 @@ router.post('/login', async (req, res) => {
 
         // Verifica token com Firebase Admin
         const decodedToken = await firebase.admin.auth().verifyIdToken(idToken);
-        const uid = decodedToken.uid;
+        const authUid = decodedToken.uid;
 
-        // Busca ou cria usuario
-        let user = await firebase.getUser(uid);
+        // Busca usuario na coleção Users (Web Gerenciador) pelo userAuthId
+        // Essa coleção usa UUID customizado como ID do documento
+        const webUser = await firebase.getUserByAuthId(authUid);
+        const userId = webUser ? webUser.id : authUid;
+
+        // Busca ou cria dados do agente na coleção users (lowercase)
+        let user = await firebase.getUser(userId);
 
         if (!user) {
-            // Pega nome do token (Google) ou do displayName (email/senha)
-            const displayName = decodedToken.name || decodedToken.displayName || decodedToken.email?.split('@')[0];
+            const displayName = webUser?.name || decodedToken.name || decodedToken.displayName || decodedToken.email?.split('@')[0];
 
-            user = await firebase.createUser(uid, {
+            user = await firebase.createUser(userId, {
                 email: decodedToken.email,
                 name: displayName,
-                auth_provider: decodedToken.firebase?.sign_in_provider || 'unknown'
+                auth_provider: decodedToken.firebase?.sign_in_provider || 'unknown',
+                userAuthId: authUid
             });
         } else {
-            // Atualiza nome se mudou (ex: usuario atualizou perfil)
-            const newName = decodedToken.name || decodedToken.displayName;
+            // Atualiza nome se mudou
+            const newName = webUser?.name || decodedToken.name || decodedToken.displayName;
             if (newName && newName !== user.name) {
-                await firebase.updateUser(uid, { name: newName });
+                await firebase.updateUser(userId, { name: newName });
                 user.name = newName;
             }
         }
 
         // Salva na sessao
-        req.session.userId = uid;
+        req.session.userId = userId;
         req.session.user = {
-            id: uid,
+            id: userId,
             email: user.email,
             name: user.name
         };
@@ -79,7 +84,7 @@ router.post('/login', async (req, res) => {
         res.json({
             success: true,
             user: {
-                id: uid,
+                id: userId,
                 email: user.email,
                 name: user.name
             }

@@ -455,6 +455,24 @@ async function getStats(userId) {
     };
 }
 
+// ==================== USERS BY AUTH ID ====================
+
+/**
+ * Busca usuario na coleção Users (Web Gerenciador) pelo uid do Firebase Auth.
+ * Os docs nessa coleção usam UUID customizado como ID, com campo userAuthId = uid do Auth.
+ */
+async function getUserByAuthId(authUid) {
+    const snapshot = await db.collection('Users')
+        .where('userAuthId', '==', authUid)
+        .limit(1)
+        .get();
+
+    if (snapshot.empty) return null;
+
+    const doc = snapshot.docs[0];
+    return { id: doc.id, ...doc.data() };
+}
+
 // ==================== WHATSAPP CREDENTIALS ====================
 
 async function getUserByPhoneNumberId(phoneNumberId) {
@@ -532,6 +550,7 @@ module.exports = {
     admin,
     // Users
     getUser,
+    getUserByAuthId,
     createUser,
     updateUser,
     updateWhatsAppStatus,

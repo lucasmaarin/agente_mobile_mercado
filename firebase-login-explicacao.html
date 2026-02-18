@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Como funciona o Login &amp; Firebase — Web Gerenciador</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #0f1117;
+      color: #e2e8f0;
+      line-height: 1.6;
+    }
+
+    header {
+      background: linear-gradient(135deg, #1a1f2e 0%, #16213e 100%);
+      border-bottom: 2px solid #f6821f;
+      padding: 32px 48px;
+    }
+
+    header h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    header p {
+      color: #94a3b8;
+      margin-top: 8px;
+      font-size: 1rem;
+    }
+
+    .badge {
+      display: inline-block;
+      background: #f6821f22;
+      border: 1px solid #f6821f55;
+      color: #f6821f;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 20px;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    main {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 48px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 48px;
+    }
+
+    /* ── Seção ── */
+    .section {
+      background: #1a1f2e;
+      border: 1px solid #2d3748;
+      border-radius: 16px;
+      overflow: hidden;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 20px 28px;
+      background: #16213e;
+      border-bottom: 1px solid #2d3748;
+    }
+
+    .section-icon {
+      font-size: 1.6rem;
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 10px;
+      background: #0f1117;
+      flex-shrink: 0;
+    }
+
+    .section-header h2 {
+      font-size: 1.2rem;
+      color: #f1f5f9;
+      font-weight: 600;
+    }
+
+    .section-header span.file {
+      font-family: 'Consolas', monospace;
+      font-size: 0.8rem;
+      color: #64748b;
+      margin-left: auto;
+      background: #0f1117;
+      padding: 3px 10px;
+      border-radius: 6px;
+    }
+
+    .section-body {
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* ── Cards de info ── */
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 14px;
+    }
+
+    .info-card {
+      background: #0f1117;
+      border: 1px solid #2d3748;
+      border-radius: 10px;
+      padding: 16px 18px;
+    }
+
+    .info-card h4 {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #64748b;
+      margin-bottom: 8px;
+    }
+
+    .info-card p {
+      font-size: 0.92rem;
+      color: #cbd5e1;
+    }
+
+    /* ── Código ── */
+    pre {
+      background: #0b0e17;
+      border: 1px solid #2d3748;
+      border-radius: 10px;
+      padding: 20px;
+      overflow-x: auto;
+      font-family: 'Consolas', 'Fira Code', monospace;
+      font-size: 0.85rem;
+      line-height: 1.7;
+    }
+
+    .k  { color: #c792ea; } /* keyword */
+    .s  { color: #c3e88d; } /* string */
+    .c  { color: #546e7a; } /* comment */
+    .f  { color: #82aaff; } /* function */
+    .v  { color: #f07178; } /* variable/field */
+    .n  { color: #ffcb6b; } /* number/const */
+
+    /* ── Fluxo / Steps ── */
+    .flow {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .step {
+      display: flex;
+      gap: 18px;
+      align-items: flex-start;
+      position: relative;
+    }
+
+    .step:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      left: 19px;
+      top: 44px;
+      width: 2px;
+      bottom: -10px;
+      background: #2d3748;
+    }
+
+    .step-num {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #f6821f;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      position: relative;
+      z-index: 1;
+    }
+
+    .step-content {
+      flex: 1;
+      padding-bottom: 24px;
+    }
+
+    .step-content h4 {
+      font-size: 0.95rem;
+      color: #f1f5f9;
+      margin-bottom: 6px;
+    }
+
+    .step-content p {
+      font-size: 0.88rem;
+      color: #94a3b8;
+    }
+
+    .step-content code {
+      font-family: 'Consolas', monospace;
+      background: #0f1117;
+      border: 1px solid #2d3748;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-size: 0.83rem;
+      color: #82aaff;
+    }
+
+    /* ── Tabela ── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+    }
+
+    thead th {
+      background: #0f1117;
+      color: #64748b;
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      letter-spacing: 1px;
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid #2d3748;
+    }
+
+    tbody tr:not(:last-child) td {
+      border-bottom: 1px solid #1e2a3a;
+    }
+
+    tbody tr:hover td {
+      background: #16213e;
+    }
+
+    tbody td {
+      padding: 12px 16px;
+      color: #cbd5e1;
+      vertical-align: top;
+    }
+
+    tbody td:first-child {
+      font-family: 'Consolas', monospace;
+      color: #f6821f;
+    }
+
+    /* ── Diagrama de camadas FCM ── */
+    .layer-diagram {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .layer {
+      border-radius: 10px;
+      padding: 14px 20px;
+      border: 1px solid;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .layer-icon { font-size: 1.2rem; }
+
+    .layer-title { font-weight: 600; font-size: 0.92rem; }
+    .layer-desc  { font-size: 0.82rem; margin-top: 2px; }
+
+    .layer.l1 { background: #1a1f2e; border-color: #f6821f55; }
+    .layer.l2 { background: #151c2c; border-color: #38bdf855; margin-left: 20px; }
+    .layer.l3 { background: #111827; border-color: #a78bfa55; margin-left: 40px; }
+    .layer.l4 { background: #0f1117; border-color: #34d39955; margin-left: 60px; }
+
+    .layer.l1 .layer-title { color: #f6821f; }
+    .layer.l2 .layer-title { color: #38bdf8; }
+    .layer.l3 .layer-title { color: #a78bfa; }
+    .layer.l4 .layer-title { color: #34d399; }
+
+    .layer .layer-desc { color: #64748b; }
+
+    /* ── Env vars ── */
+    .env-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 10px;
+    }
+
+    .env-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #0f1117;
+      border: 1px solid #2d3748;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-family: 'Consolas', monospace;
+      font-size: 0.8rem;
+    }
+
+    .env-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: #34d399;
+      flex-shrink: 0;
+    }
+
+    .env-dot.warn { background: #f6821f; }
+
+    .env-name { color: #f1f5f9; }
+    .env-tag  { margin-left: auto; font-size: 0.7rem; color: #64748b; }
+
+    /* ── Alerta ── */
+    .alert {
+      background: #1a1208;
+      border: 1px solid #f6821f44;
+      border-left: 3px solid #f6821f;
+      border-radius: 8px;
+      padding: 14px 18px;
+      font-size: 0.88rem;
+      color: #fed7aa;
+    }
+
+    .alert strong { color: #f6821f; }
+
+    /* ── Copiar ── */
+    .files-to-copy {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .file-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #0f1117;
+      border: 1px solid #2d3748;
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-family: 'Consolas', monospace;
+      font-size: 0.82rem;
+      color: #82aaff;
+    }
+
+    .file-pill .file-icon { font-size: 1rem; }
+
+    footer {
+      text-align: center;
+      padding: 32px;
+      color: #334155;
+      font-size: 0.82rem;
+      border-top: 1px solid #1e293b;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="badge">Documentação Interna</div>
+  <h1>Como funciona o Login &amp; Firebase</h1>
+  <p>Web Gerenciador — Arquitetura de autenticação, Firestore e notificações FCM</p>
+</header>
+
+<main>
+
+  <!-- ─────────────────────────────────────────────── -->
+  <!-- 1. INICIALIZAÇÃO DO FIREBASE                   -->
+  <!-- ─────────────────────────────────────────────── -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon">🔥</div>
+      <h2>1. Inicialização do Firebase</h2>
+      <span class="file">src/firebase/index.jsx</span>
+    </div>
+    <div class="section-body">
+
+      <p style="color:#94a3b8;font-size:.9rem;">
+        Ponto de entrada de todos os serviços Firebase. Lê as credenciais via variáveis de
+        ambiente e exporta os módulos prontos para uso em qualquer componente.
+      </p>
+
+      <div class="info-grid">
+        <div class="info-card">
+          <h4>db</h4>
+          <p><strong>Firestore</strong> — banco de dados NoSQL em tempo real</p>
+        </div>
+        <div class="info-card">
+          <h4>auth</h4>
+          <p><strong>Firebase Auth</strong> — autenticação email/senha, sessão persistente</p>
+        </div>
+        <div class="info-card">
+          <h4>storage</h4>
+          <p><strong>Firebase Storage</strong> — armazenamento de arquivos/imagens</p>
+        </div>
+        <div class="info-card">
+          <h4>messaging</h4>
+          <p><strong>FCM</strong> — push notifications web (foreground + background)</p>
+        </div>
+      </div>
+
+      <pre><span class="k">import</span> { initializeApp } <span class="k">from</span> <span class="s">"firebase/app"</span>;
+<span class="k">import</span> { getFirestore } <span class="k">from</span> <span class="s">"firebase/firestore"</span>;
+<span class="k">import</span> { getAuth }      <span class="k">from</span> <span class="s">"firebase/auth"</span>;
+<span class="k">import</span> { getStorage }   <span class="k">from</span> <span class="s">"firebase/storage"</span>;
+<span class="k">import</span> { getMessaging } <span class="k">from</span> <span class="s">"firebase/messaging"</span>;
+
+<span class="k">const</span> <span class="n">app</span>  = <span class="f">initializeApp</span>(firebaseConfig);
+
+<span class="k">export const</span> <span class="n">db</span>        = <span class="f">getFirestore</span>(app);
+<span class="k">export const</span> <span class="n">auth</span>      = <span class="f">getAuth</span>(app);
+<span class="k">export const</span> <span class="n">storage</span>   = <span class="f">getStorage</span>(app);
+<span class="k">export const</span> <span class="n">messaging</span> = <span class="f">getMessaging</span>(app);</pre>
+
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────────────────────── -->
+  <!-- 2. FLUXO DE LOGIN                              -->
+  <!-- ─────────────────────────────────────────────── -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon">🔐</div>
+      <h2>2. Fluxo de Login (email + senha)</h2>
+      <span class="file">src/pages/Login.jsx</span>
+    </div>
+    <div class="section-body">
+
+      <div class="flow">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-content">
+            <h4>Usuário preenche e-mail e senha</h4>
+            <p>Formulário controlado com estados React. O botão chama <code>handleFirstStep()</code>.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-content">
+            <h4>Autenticação no Firebase Auth</h4>
+            <p><code>signInWithEmailAndPassword(auth, email, password)</code> — retorna um <code>credential</code> com o <code>user.uid</code>.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-content">
+            <h4>onAuthStateChanged detecta automaticamente</h4>
+            <p>O listener global dispara assim que o Auth muda de estado (login, logout, reload da página).</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">4</div>
+          <div class="step-content">
+            <h4>Busca o documento do usuário no Firestore</h4>
+            <p>
+              Consulta a coleção <code>Users</code> filtrando por <code>userAuthId == user.uid</code>.
+              O <code>uid</code> do Auth e o ID do documento Firestore são <strong>separados</strong>.
+            </p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">5</div>
+          <div class="step-content">
+            <h4>Verifica se tem estabelecimento cadastrado</h4>
+            <p>
+              Lê o doc <code>estabelecimentos/{userId}</code>. Se existir → redireciona para <code>/</code>.
+              Se não → redireciona para <code>/estabelecimento</code>.
+            </p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">6</div>
+          <div class="step-content">
+            <h4>Garante token FCM</h4>
+            <p>
+              <code>ensureUserTokenDocument()</code> verifica se já existe um token na coleção
+              <code>FcmTokens</code>. Se não tiver, solicita permissão e salva.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <pre><span class="c">// Busca o doc do usuário pelo uid do Auth</span>
+<span class="k">const</span> <span class="f">fetchUserDocByAuthId</span> = <span class="k">async</span> (userAuthId) => {
+  <span class="k">const</span> q = <span class="f">query</span>(
+    <span class="f">collection</span>(db, <span class="s">'Users'</span>),
+    <span class="f">where</span>(<span class="s">'userAuthId'</span>, <span class="s">'=='</span>, userAuthId)
+  );
+  <span class="k">const</span> snapshot = <span class="k">await</span> <span class="f">getDocs</span>(q);
+  <span class="k">return</span> snapshot.empty ? <span class="k">null</span> : snapshot.docs[<span class="n">0</span>];
+};
+
+<span class="c">// Verifica se existe doc em estabelecimentos/{userId}</span>
+<span class="k">const</span> establishmentDoc = <span class="k">await</span> <span class="f">getDoc</span>(
+  <span class="f">doc</span>(db, <span class="s">'estabelecimentos'</span>, userId)
+);</pre>
+
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────────────────────── -->
+  <!-- 3. FLUXO DE CADASTRO                           -->
+  <!-- ─────────────────────────────────────────────── -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon">📝</div>
+      <h2>3. Fluxo de Cadastro (2 etapas)</h2>
+      <span class="file">src/pages/Login.jsx</span>
+    </div>
+    <div class="section-body">
+
+      <div class="info-grid">
+        <div class="info-card">
+          <h4>Etapa 1 — Dados básicos</h4>
+          <p>Nome, e-mail, senha e confirmação de senha.</p>
+        </div>
+        <div class="info-card">
+          <h4>Etapa 2 — Dados pessoais</h4>
+          <p>CPF (com máscara), RG (com máscara) e data de nascimento.</p>
+        </div>
+      </div>
+
+      <div class="flow">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-content">
+            <h4>Cria usuário no Firebase Auth</h4>
+            <p><code>createUserWithEmailAndPassword(auth, email, password)</code> → retorna <code>userCredential.user.uid</code></p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-content">
+            <h4>Gera um UUID customizado</h4>
+            <p><code>uuidv4().replace(/-/g, '')</code> — esse UUID será o <strong>ID do documento no Firestore</strong>, não o uid do Auth.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-content">
+            <h4>Salva documento em Users/{customId}</h4>
+            <p>Usa <code>setDoc(doc(db, 'Users', customId), {...})</code> com todos os dados do usuário + o <code>userAuthId</code> para vincular ao Auth.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">4</div>
+          <div class="step-content">
+            <h4>onAuthStateChanged detecta e redireciona</h4>
+            <p>Como não tem estabelecimento ainda, vai para <code>/estabelecimento</code>.</p>
+          </div>
+        </div>
+      </div>
+
+      <pre><span class="c">// Estrutura salva na coleção Users</span>
+{
+  <span class="v">email</span>:         <span class="s">"usuario@email.com"</span>,
+  <span class="v">id</span>:            <span class="s">"abc123..."</span>,          <span class="c">// UUID customizado (= ID do doc)</span>
+  <span class="v">name</span>:          <span class="s">"Nome Completo"</span>,
+  <span class="v">cpfDocument</span>:   <span class="s">"12345678901"</span>,         <span class="c">// só dígitos</span>
+  <span class="v">rgDocument</span>:    <span class="s">"123456789"</span>,           <span class="c">// só dígitos</span>
+  <span class="v">profileImage</span>:  <span class="k">null</span>,
+  <span class="v">verified</span>:      <span class="k">false</span>,
+  <span class="v">dateOfBirth</span>:   <span class="s">"15 de março de 1990 às 00:00:00 UTC-2"</span>,
+  <span class="v">createdAt</span>:     <span class="s">"18 de fevereiro de 2026 às ..."</span>,
+  <span class="v">hasEstablishment</span>: <span class="k">false</span>,
+  <span class="v">packageName</span>:   <span class="s">"br.com.mobilesupermercado.mobileSupermercado"</span>,
+  <span class="v">userAuthId</span>:    <span class="s">"uid-do-firebase-auth"</span>, <span class="c">// ← chave de ligação</span>
+  <span class="v">userType</span>:      <span class="s">"UserType.empresa"</span>,
+  <span class="v">whitelabelId</span>:  <span class="s">"br.com.mobile.gerenciador"</span>
+}</pre>
+
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────────────────────── -->
+  <!-- 4. ESTRUTURA DAS COLEÇÕES                      -->
+  <!-- ─────────────────────────────────────────────── -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon">🗄️</div>
+      <h2>4. Coleções no Firestore</h2>
+    </div>
+    <div class="section-body">
+      <table>
+        <thead>
+          <tr>
+            <th>Coleção</th>
+            <th>ID do Documento</th>
+            <th>Campos principais</th>
+            <th>Uso</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Users</td>
+            <td>UUID customizado</td>
+            <td>userAuthId, email, name, cpfDocument, userType, hasEstablishment</td>
+            <td>Perfil do usuário; vinculado ao Auth via <code>userAuthId</code></td>
+          </tr>
+          <tr>
+            <td>estabelecimentos</td>
+            <td>mesmo <code>Users.id</code></td>
+            <td>dados do estabelecimento</td>
+            <td>Verifica se o usuário já configurou seu negócio</td>
+          </tr>
+          <tr>
+            <td>FcmTokens</td>
+            <td>token FCM (string)</td>
+            <td>clientId, token, platform, active, createdAt</td>
+            <td>Tokens push; <code>clientId</code> aponta para o ID do doc em Users</td>
+          </tr>
+          <tr>
+            <td>PurchaseRequests</td>
+            <td>auto (Firestore)</td>
+            <td>companyReference (ref), clientName, orderNumber, createdAt</td>
+            <td>Pedidos; <code>companyReference</code> é uma <em>DocumentReference</em> para <code>estabelecimentos</code></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="alert">
+        <strong>Atenção — dois IDs separados:</strong> O <code>user.uid</code> do Firebase Auth e o
+        ID do documento no Firestore são diferentes. O campo <code>userAuthId</code> dentro do doc
+        de <code>Users</code> faz a ponte entre os dois.
+      </div>
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────────────────────── -->
+  <!-- 5. NOTIFICAÇÕES FCM                            -->
+  <!-- ─────────────────────────────────────────────── -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon">🔔</div>
+      <h2>5. Notificações Push (FCM)</h2>
+      <span class="file">fcmUtils.js · useFCM.js · FCMListener.jsx</span>
+    </div>
+    <div class="section-body">
+
+      <p style="color:#94a3b8;font-size:.9rem;">
+        Sistema com 4 camadas. O <strong>FCMListener</strong> é um componente invisível
+        (retorna null) montado na raiz do app que orquestra tudo.
+      </p>
+
+      <div class="layer-diagram">
+        <div class="layer l1">
+          <span class="layer-icon">🎯</span>
+          <div>
+            <div class="layer-title">FCMListener (componente global)</div>
+            <div class="layer-desc">Escuta Auth, busca userId no Firestore, inicia FCM e faz onSnapshot nos pedidos</div>
+          </div>
+        </div>
+        <div class="layer l2">
+          <span class="layer-icon">🪝</span>
+          <div>
+            <div class="layer-title">useFCM (hook)</div>
+            <div class="layer-desc">Chama requestNotificationPermission e configura o listener de mensagens foreground</div>
+          </div>
+        </div>
+        <div class="layer l3">
+          <span class="layer-icon">🛠️</span>
+          <div>
+            <div class="layer-title">fcmUtils.js (utilitários)</div>
+            <div class="layer-desc">Registra Service Worker, obtém token FCM via getToken(), salva/atualiza em FcmTokens</div>
+          </div>
+        </div>
+        <div class="layer l4">
+          <span class="layer-icon">⚙️</span>
+          <div>
+            <div class="layer-title">firebase-messaging-sw.js (Service Worker)</div>
+            <div class="layer-desc">Recebe e exibe notificações mesmo com o app fechado (background)</div>
+          </div>
+        </div>
+      </div>
+
+      <pre><span class="c">// 1. Registra o Service Worker</span>
+<span class="k">await</span> navigator.serviceWorker.<span class="f">register</span>(<span class="s">'/firebase-messaging-sw.js'</span>);
+
+<span class="c">// 2. Solicita permissão ao usuário</span>
+<span class="k">const</span> permission = <span class="k">await</span> Notification.<span class="f">requestPermission</span>(); <span class="c">// 'granted'</span>
+
+<span class="c">// 3. Obtém o token FCM</span>
+<span class="k">const</span> token = <span class="k">await</span> <span class="f">getToken</span>(messaging, { <span class="v">vapidKey</span>: VAPID_KEY });
+
+<span class="c">// 4. Salva token no Firestore</span>
+<span class="k">await</span> <span class="f">setDoc</span>(<span class="f">doc</span>(db, <span class="s">'FcmTokens'</span>, token), {
+  <span class="v">clientId</span>:  userId,   <span class="c">// ID do doc em Users</span>
+  <span class="v">platform</span>:  <span class="s">'web'</span>,
+  <span class="v">active</span>:    <span class="k">true</span>,
+  <span class="v">updatedAt</span>: <span class="f">serverTimestamp</span>()
+}, { <span class="v">merge</span>: <span class="k">true</span> });
+
+<span class="c">// 5. Listener de pedidos em tempo real (onSnapshot)</span>
+<span class="f">onSnapshot</span>(<span class="f">query</span>(
+  <span class="f">collection</span>(db, <span class="s">'PurchaseRequests'</span>),
+  <span class="f">where</span>(<span class="s">'companyReference'</span>, <span class="s">'=='</span>, empresaRef)
+), (snapshot) => { <span class="c">/* detecta pedidos novos */</span> });</pre>
+
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────────────────────── -->
+  <!-- 6. VARIÁVEIS DE AMBIENTE                       -->
+  <!-- ─────────────────────────────────────────────── -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon">🔑</div>
+      <h2>6. Variáveis de Ambiente (.env)</h2>
+    </div>
+    <div class="section-body">
+      <p style="color:#94a3b8;font-size:.9rem;margin-bottom:8px;">
+        Todas as credenciais ficam no arquivo <code>.env</code> na raiz do projeto.
+        No Vite, as variáveis precisam do prefixo <code>VITE_</code> para serem
+        acessíveis no frontend via <code>import.meta.env</code>.
+      </p>
+      <div class="env-grid">
+        <div class="env-item"><span class="env-dot"></span><span class="env-name">VITE_FIREBASE_API_KEY</span></div>
+        <div class="env-item"><span class="env-dot"></span><span class="env-name">VITE_FIREBASE_AUTH_DOMAIN</span></div>
+        <div class="env-item"><span class="env-dot"></span><span class="env-name">VITE_FIREBASE_DATABASE_URL</span></div>
+        <div class="env-item"><span class="env-dot"></span><span class="env-name">VITE_FIREBASE_PROJECT_ID</span></div>
+        <div class="env-item"><span class="env-dot"></span><span class="env-name">VITE_FIREBASE_STORAGE_BUCKET</span></div>
+        <div class="env-item"><span class="env-dot"></span><span class="env-name">VITE_FIREBASE_MESSAGING_SENDER_ID</span></div>
+        <div class="env-item"><span class="env-dot"></span><span class="env-name">VITE_FIREBASE_APP_ID</span></div>
+        <div class="env-item"><span class="env-dot"></span><span class="env-name">VITE_FIREBASE_MEASUREMENT_ID</span></div>
+        <div class="env-item"><span class="env-dot warn"></span><span class="env-name">VITE_FIREBASE_VAPID_KEY</span><span class="env-tag">FCM</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────────────────────── -->
+  <!-- 7. ARQUIVOS PARA COPIAR                        -->
+  <!-- ─────────────────────────────────────────────── -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon">📦</div>
+      <h2>7. Arquivos para copiar para outro projeto</h2>
+    </div>
+    <div class="section-body">
+
+      <div class="files-to-copy">
+        <div class="file-pill"><span class="file-icon">🔥</span>src/firebase/index.jsx</div>
+        <div class="file-pill"><span class="file-icon">🛠️</span>src/utils/fcmUtils.js</div>
+        <div class="file-pill"><span class="file-icon">🪝</span>src/hooks/useFCM.js</div>
+        <div class="file-pill"><span class="file-icon">🎯</span>src/components/FCMListener.jsx</div>
+        <div class="file-pill"><span class="file-icon">⚙️</span>public/firebase-messaging-sw.js</div>
+        <div class="file-pill"><span class="file-icon">🔑</span>.env (ajustar credenciais)</div>
+      </div>
+
+      <div class="alert" style="margin-top:8px;">
+        <strong>Lembre-se:</strong> Após copiar, atualize o <code>firebaseConfig</code> com as
+        credenciais do <strong>novo projeto Firebase</strong>. Os campos
+        <code>packageName</code> e <code>whitelabelId</code> dentro de <code>saveUserToFirestore</code>
+        também devem ser ajustados para o novo app.
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Arquivo</th>
+            <th>O que precisa mudar</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>firebase/index.jsx</td>
+            <td>Credenciais do firebaseConfig (via .env)</td>
+          </tr>
+          <tr>
+            <td>Login.jsx</td>
+            <td><code>packageName</code>, <code>whitelabelId</code>, coleções usadas, rotas de redirecionamento</td>
+          </tr>
+          <tr>
+            <td>FCMListener.jsx</td>
+            <td>Nome das coleções (<code>PurchaseRequests</code>, <code>estabelecimentos</code>), campos consultados</td>
+          </tr>
+          <tr>
+            <td>firebase-messaging-sw.js</td>
+            <td>Credenciais do Firebase (repetidas no SW pois não acessa import.meta.env)</td>
+          </tr>
+        </tbody>
+      </table>
+
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  Gerado automaticamente · Web Gerenciador · 2026
+</footer>
+
+</body>
+</html>
